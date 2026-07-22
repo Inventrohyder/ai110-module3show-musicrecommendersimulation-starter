@@ -232,7 +232,9 @@ def _feature_reason(name: str, earned: float, weight: float, detail: str) -> str
     return f"{name} {detail}: +{earned:.1f}/{weight:.0f}"
 
 
-def score_song(user_prefs: Mapping[str, Any], song: Mapping[str, Any] | Song) -> tuple[float, list[str]]:
+def score_song(
+    user_prefs: Mapping[str, Any], song: Mapping[str, Any] | Song, *, include_energy: bool = True
+) -> tuple[float, list[str]]:
     """Return a 0–100 content score and the exact contributions that produced it."""
     record = song.to_record() if isinstance(song, Song) else validate_song_record(song)
     preferences = _normalize_preferences(user_prefs)
@@ -250,9 +252,11 @@ def score_song(user_prefs: Mapping[str, Any], song: Mapping[str, Any] | Song) ->
         _feature_reason("mood", mood_score, CORE_WEIGHTS["mood"], "match" if mood_match else "mismatch")
     )
 
+    energy_weight = CORE_WEIGHTS["energy"] if include_energy else 0.0
     energy_similarity = _similarity(record["energy"], preferences["energy"], 1.0)
-    energy_score = CORE_WEIGHTS["energy"] * energy_similarity
-    reasons.append(_feature_reason("energy", energy_score, CORE_WEIGHTS["energy"], f"similarity {energy_similarity:.2f}"))
+    energy_score = energy_weight * energy_similarity
+    energy_detail = f"similarity {energy_similarity:.2f}" if include_energy else "excluded for experiment"
+    reasons.append(_feature_reason("energy", energy_score, energy_weight, energy_detail))
 
     tempo_similarity = _similarity(record["tempo_bpm"], preferences["tempo_bpm"], 80.0)
     tempo_score = CORE_WEIGHTS["tempo"] * tempo_similarity
@@ -276,7 +280,8 @@ def score_song(user_prefs: Mapping[str, Any], song: Mapping[str, Any] | Song) ->
     )
 
     earned = genre_score + mood_score + energy_score + tempo_score + valence_score + dance_score + acoustic_score
-    return round(100.0 * earned / CORE_WEIGHT_TOTAL, 2), reasons
+    available_weight = CORE_WEIGHT_TOTAL if include_energy else CORE_WEIGHT_TOTAL - CORE_WEIGHTS["energy"]
+    return round(100.0 * earned / available_weight, 2), reasons
 
 
 def recommend_songs(

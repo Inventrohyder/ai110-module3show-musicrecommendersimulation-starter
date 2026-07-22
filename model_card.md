@@ -26,28 +26,28 @@ The catalog has 20 songs across eight broad genres: the ten course-provided star
 
 ## 5. Strengths
 
-The completed profile evaluation will record observed strengths from real CLI runs.
+The three real CLI profiles show the intended broad behavior: the high-energy-pop profile ranks Sunrise City first, chill-lofi ranks Library Rain first, and deep-intense-rock ranks Everlong first. Reasons expose every contribution, so a reader can see both strong matches and trade-offs instead of treating the score as a black box.
 
 ---
 
 ## 6. Limitations and Bias
 
-Manual annotations and an uneven tiny catalog can encode the curator's judgement. Exact genre/mood matching can overfit one label and hide songs that a person might enjoy for other reasons. The later evaluation adds a controlled experiment and a documented diversity adjustment.
+Manual annotations and an uneven tiny catalog can encode the curator's judgement. Exact genre/mood matching can overfit one label and hide songs that a person might enjoy for other reasons. For example, chill-lofi still ranks Snowfall and Feather despite mood mismatches because genre and numerical similarity compensate. The catalog is also heavily English-language and has no real listener interaction data. A later artist-diversity adjustment reduces repetition but does not make a broad fairness guarantee.
 
 ---
 
 ## 7. Evaluation
 
-The checked-in catalog is loaded and ranked in automated integration tests; the completed evaluation will add three distinct CLI profile runs.
+Automated tests load the checked-in CSV, reject a checked-in malformed CSV, compare the functional and OOP APIs, and run the real command in a subprocess. BDD scenarios exercise high-energy-pop, chill-lofi, and deep-intense-rock against the same catalog. The actual CLI runs selected Sunrise City, Library Rain, and Everlong respectively. A controlled experiment removed Happy's energy contribution: its score changed from 92.06 to 91.07, confirming that energy affects the score without being the only factor.
 
 ---
 
 ## 8. Future Work
 
-The planned extensions add five transparent attributes, a second strategy, diversity-aware selection, and a formatted explanation table. A production system would need consented interaction data, a larger balanced catalog, user studies, and monitoring for disparate outcomes.
+The planned extensions add five transparent attributes, a second strategy, diversity-aware selection, and a formatted explanation table. A production system would need consented interaction data, a larger balanced catalog, user studies, accessibility and language coverage, and monitoring for disparate outcomes.
 
 ---
 
-## 9. Personal Reflection
+## 9. Optional Personal Reflection
 
-The completed profile evaluation will add the student's reflection after examining actual outputs.
+I learned that a recommendation score can look precise while still depending on subjective feature definitions and hand-chosen weights. Comparing the three profiles made the ranking behavior easy to predict, but LoRoom's visible repeat-artist adjustment showed why explanation is not the same as correctness: the system can clearly explain why Focus Flow loses 15 points while a listener might still prefer it. This simulation made me more aware that real recommenders need richer data, user control, and careful bias evaluation rather than only a larger scoring formula.

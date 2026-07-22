@@ -13,3 +13,4 @@ All notable changes to VibeFinder are documented here. This project follows a sm
 - Kept markdownlint but disabled MD013 so captured CLI tables and source URLs remain exact.
 - Preserved the starter catalog, extended it with ten verified recordings, and added the explainable core scorer.
 - Added a portable, explainable command-line recommendation flow.
+- Added three profile evaluations, BDD scenarios, and a controlled energy-feature experiment.
