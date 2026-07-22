@@ -1,43 +1,32 @@
 # AI Interactions Log
 
-> **Stretch features only.** Only fill in the sections that apply to stretch features you attempted. If you did not attempt a stretch feature, leave its section blank or delete it. This file is not required for the core project.
-
----
+This file records only actual AI-assisted stretch-feature work in this repository.
 
 ## Agentic Workflow (SF8)
 
-> Document your experience using an AI agent (e.g., Cursor Agent, Claude, Copilot) to make multi-step changes autonomously.
+### What task did I give the agent?
 
-**What task did you give the agent?**
+I asked Codex desktop (GPT-5) to implement the approved VibeFinder delivery plan, including the stretch requirement to add five meaningful song attributes and keep the scorer, tests, provenance, Model Card, and README consistent. The request began: **“PLEASE IMPLEMENT THIS PLAN: # VibeFinder — Project 3 Perfect-Score Delivery Plan.”**
 
-<!-- Describe the goal you asked the agent to accomplish -->
+### Prompts used
 
-**Prompts used:**
+- “PLEASE IMPLEMENT THIS PLAN: # VibeFinder — Project 3 Perfect-Score Delivery Plan.”
+- “You are making sure that each file that needs to be updated is updated in the very PR that it is associated with… Like the README, or the reflections, or the ai-interactions…”
+- “Extend the starter catalog, not fully replacing it.”
 
-<!-- Paste the key prompts you gave the agent -->
+### What did the agent generate or change?
 
-**What did the agent generate or change?**
+- Preserved the ten course starter entries and extended `data/songs.csv` with ten MusicBrainz-verified recordings. The five added attributes—`release_decade`, `mood_tags`, `instrumentalness`, `liveness`, and `speechiness`—are present for all 20 catalog rows as student-reviewed simulation annotations.
+- Extended the shared functional/OOP scoring path in `src/recommender.py`, including validation, normalized 0–100 scoring, and explanation text for every added contribution.
+- Updated the named profiles in `src/main.py`, checked-in-catalog tests, `docs/data-provenance.md`, README weight/output evidence, and Model Card disclosure.
 
-<!-- List the files edited, code generated, or commands run -->
+### What did I verify or fix manually?
 
-**What did you verify or fix manually?**
-
-<!-- Describe anything the agent got wrong or that required human review -->
-
----
+- I reviewed the MusicBrainz identity and release-year sources for the ten added recordings in `docs/data-provenance.md` and kept all descriptor values explicitly labelled as classroom simulation annotations.
+- I ran `uv run pytest`, `uv run python -m src.main --all-profiles --top-k 3`, and `trunk check` against the changed files. I also compared captured README tables with real CLI output rather than treating generated prose as evidence.
+- I corrected the catalog after the user required the starter entries to be extended rather than replaced. The final catalog therefore has ten fictional course entries and ten verified additions; it does not claim that all 20 rows are real recordings.
+- I corrected stale documentation that referred to removed songs and artists. The final diversity evidence is the visible `-15.0` adjustment for _Focus Flow_ after _Midnight Coding_ by LoRoom, not a Nujabes example.
 
 ## Design Pattern (SF10)
 
-> Document how AI helped you choose or implement a design pattern.
-
-**Which design pattern did you use?**
-
-<!-- e.g., Strategy, Factory, Observer, etc. -->
-
-**How did AI help you brainstorm or implement it?**
-
-<!-- Describe the conversation or suggestions that led to your decision -->
-
-**How does the pattern appear in your final code?**
-
-<!-- Point to the relevant class or method -->
+This section is completed in the later ranking-strategy layer, where two real ranking strategies are introduced and tested.

@@ -18,7 +18,15 @@ CORE_WEIGHTS = {
     "danceability": 8.0,
     "acousticness": 6.0,
 }
+ADVANCED_WEIGHTS = {
+    "release_decade": 5.0,
+    "mood_tags": 5.0,
+    "instrumentalness": 4.0,
+    "liveness": 4.0,
+    "speechiness": 4.0,
+}
 CORE_WEIGHT_TOTAL = sum(CORE_WEIGHTS.values())
+TOTAL_WEIGHT = CORE_WEIGHT_TOTAL + sum(ADVANCED_WEIGHTS.values())
 REQUIRED_COLUMNS = (
     "id",
     "title",
@@ -30,8 +38,21 @@ REQUIRED_COLUMNS = (
     "valence",
     "danceability",
     "acousticness",
+    "release_decade",
+    "mood_tags",
+    "instrumentalness",
+    "liveness",
+    "speechiness",
 )
-UNIT_INTERVAL_FIELDS = ("energy", "valence", "danceability", "acousticness")
+UNIT_INTERVAL_FIELDS = (
+    "energy",
+    "valence",
+    "danceability",
+    "acousticness",
+    "instrumentalness",
+    "liveness",
+    "speechiness",
+)
 
 
 @dataclass(frozen=True)
@@ -48,6 +69,11 @@ class Song:
     valence: float
     danceability: float
     acousticness: float
+    release_decade: int = 2010
+    mood_tags: tuple[str, ...] = ()
+    instrumentalness: float = 0.0
+    liveness: float = 0.0
+    speechiness: float = 0.0
 
     @classmethod
     def from_record(cls, record: Mapping[str, Any]) -> "Song":
@@ -67,6 +93,11 @@ class Song:
             "valence": self.valence,
             "danceability": self.danceability,
             "acousticness": self.acousticness,
+            "release_decade": self.release_decade,
+            "mood_tags": self.mood_tags,
+            "instrumentalness": self.instrumentalness,
+            "liveness": self.liveness,
+            "speechiness": self.speechiness,
         }
 
 
@@ -81,6 +112,11 @@ class UserProfile:
     target_tempo: float = 120.0
     target_valence: float = 0.5
     target_danceability: float = 0.5
+    target_release_decade: int = 2010
+    desired_mood_tags: tuple[str, ...] = ("neutral",)
+    likes_instrumental: bool = False
+    target_liveness: float = 0.5
+    target_speechiness: float = 0.2
 
     def to_preferences(self) -> SongRecord:
         """Return the dictionary accepted by the functional scoring API."""
@@ -92,6 +128,11 @@ class UserProfile:
             "tempo_bpm": self.target_tempo,
             "valence": self.target_valence,
             "danceability": self.target_danceability,
+            "release_decade": self.target_release_decade,
+            "mood_tags": self.desired_mood_tags,
+            "likes_instrumental": self.likes_instrumental,
+            "liveness": self.target_liveness,
+            "speechiness": self.target_speechiness,
         }
 
 
@@ -129,6 +170,29 @@ def _unit_interval(value: Any, field: str) -> float:
     return number
 
 
+def _release_decade(value: Any, field: str) -> int:
+    """Validate an integer decade used as a transparent era preference."""
+    try:
+        decade = int(value)
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"{field} must be a decade such as 2010, got {value!r}") from error
+    if not 1900 <= decade <= 2020 or decade % 10:
+        raise ValueError(f"{field} must be a decade from 1900 through 2020, got {decade}")
+    return decade
+
+
+def _mood_tags(value: Any, field: str) -> tuple[str, ...]:
+    """Normalize a pipe-delimited CSV field or a profile tag collection."""
+    raw_tags = value.split("|") if isinstance(value, str) else value
+    try:
+        tags = tuple(tag.strip().casefold() for tag in raw_tags if tag.strip())
+    except TypeError as error:
+        raise ValueError(f"{field} must be pipe-delimited text or a tag collection") from error
+    if not tags:
+        raise ValueError(f"{field} must include at least one tag")
+    return tags
+
+
 def validate_song_record(record: Mapping[str, Any]) -> SongRecord:
     """Validate and normalize one CSV record before it reaches scoring logic."""
     missing = [column for column in REQUIRED_COLUMNS if column not in record]
@@ -153,6 +217,8 @@ def validate_song_record(record: Mapping[str, Any]) -> SongRecord:
     if tempo <= 0:
         raise ValueError(f"tempo_bpm must be positive, got {tempo}")
     normalized["tempo_bpm"] = tempo
+    normalized["release_decade"] = _release_decade(record["release_decade"], "release_decade")
+    normalized["mood_tags"] = _mood_tags(record["mood_tags"], "mood_tags")
     return normalized
 
 
@@ -199,6 +265,9 @@ def _normalize_preferences(user_prefs: Mapping[str, Any]) -> SongRecord:
     likes_acoustic = _preference_value(user_prefs, "likes_acoustic", default=False)
     if not isinstance(likes_acoustic, bool):
         raise ValueError("likes_acoustic must be true or false")
+    likes_instrumental = _preference_value(user_prefs, "likes_instrumental", default=False)
+    if not isinstance(likes_instrumental, bool):
+        raise ValueError("likes_instrumental must be true or false")
     return {
         "genre": genre,
         "mood": mood,
@@ -219,6 +288,23 @@ def _normalize_preferences(user_prefs: Mapping[str, Any]) -> SongRecord:
             "target danceability",
         ),
         "likes_acoustic": likes_acoustic,
+        "release_decade": _release_decade(
+            _preference_value(user_prefs, "release_decade", "target_release_decade", default=2010),
+            "target release_decade",
+        ),
+        "mood_tags": _mood_tags(
+            _preference_value(user_prefs, "mood_tags", "desired_mood_tags", default=("neutral",)),
+            "target mood_tags",
+        ),
+        "likes_instrumental": likes_instrumental,
+        "liveness": _unit_interval(
+            _preference_value(user_prefs, "liveness", "target_liveness", default=0.5),
+            "target liveness",
+        ),
+        "speechiness": _unit_interval(
+            _preference_value(user_prefs, "speechiness", "target_speechiness", default=0.2),
+            "target speechiness",
+        ),
     }
 
 
@@ -279,8 +365,60 @@ def score_song(
         _feature_reason("acoustic preference", acoustic_score, CORE_WEIGHTS["acousticness"], f"similarity {acoustic_similarity:.2f}")
     )
 
-    earned = genre_score + mood_score + energy_score + tempo_score + valence_score + dance_score + acoustic_score
-    available_weight = CORE_WEIGHT_TOTAL if include_energy else CORE_WEIGHT_TOTAL - CORE_WEIGHTS["energy"]
+    decade_similarity = _similarity(record["release_decade"], preferences["release_decade"], 40.0)
+    decade_score = ADVANCED_WEIGHTS["release_decade"] * decade_similarity
+    reasons.append(
+        _feature_reason("release decade", decade_score, ADVANCED_WEIGHTS["release_decade"], f"similarity {decade_similarity:.2f}")
+    )
+
+    shared_tags = set(record["mood_tags"]) & set(preferences["mood_tags"])
+    tag_similarity = len(shared_tags) / len(preferences["mood_tags"])
+    tag_score = ADVANCED_WEIGHTS["mood_tags"] * tag_similarity
+    reasons.append(
+        _feature_reason("mood-tag overlap", tag_score, ADVANCED_WEIGHTS["mood_tags"], f"similarity {tag_similarity:.2f}")
+    )
+
+    instrumental_target = 1.0 if preferences["likes_instrumental"] else 0.0
+    instrumental_similarity = _similarity(record["instrumentalness"], instrumental_target, 1.0)
+    instrumental_score = ADVANCED_WEIGHTS["instrumentalness"] * instrumental_similarity
+    reasons.append(
+        _feature_reason(
+            "instrumental preference",
+            instrumental_score,
+            ADVANCED_WEIGHTS["instrumentalness"],
+            f"similarity {instrumental_similarity:.2f}",
+        )
+    )
+
+    liveness_similarity = _similarity(record["liveness"], preferences["liveness"], 1.0)
+    liveness_score = ADVANCED_WEIGHTS["liveness"] * liveness_similarity
+    reasons.append(
+        _feature_reason("liveness", liveness_score, ADVANCED_WEIGHTS["liveness"], f"similarity {liveness_similarity:.2f}")
+    )
+
+    speechiness_similarity = _similarity(record["speechiness"], preferences["speechiness"], 1.0)
+    speechiness_score = ADVANCED_WEIGHTS["speechiness"] * speechiness_similarity
+    reasons.append(
+        _feature_reason(
+            "speechiness", speechiness_score, ADVANCED_WEIGHTS["speechiness"], f"similarity {speechiness_similarity:.2f}"
+        )
+    )
+
+    earned = (
+        genre_score
+        + mood_score
+        + energy_score
+        + tempo_score
+        + valence_score
+        + dance_score
+        + acoustic_score
+        + decade_score
+        + tag_score
+        + instrumental_score
+        + liveness_score
+        + speechiness_score
+    )
+    available_weight = TOTAL_WEIGHT if include_energy else TOTAL_WEIGHT - CORE_WEIGHTS["energy"]
     return round(100.0 * earned / available_weight, 2), reasons
 
 

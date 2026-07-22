@@ -26,7 +26,18 @@ HIGH_ENERGY_POP = {
     "valence": 0.80,
     "danceability": 0.85,
     "likes_acoustic": False,
+    "release_decade": 2010,
+    "mood_tags": ("dance", "uplifting"),
+    "likes_instrumental": False,
+    "liveness": 0.12,
+    "speechiness": 0.05,
 }
+
+
+@pytest.fixture
+def happy_song() -> dict[str, object]:
+    """Provide the checked-in MusicBrainz-verified Happy row for score experiments."""
+    return load_songs(CATALOG_PATH)[10]
 
 
 def test_checked_in_catalog_has_twenty_rows() -> None:
@@ -130,7 +141,6 @@ def _run_cli(*arguments: str) -> subprocess.CompletedProcess[str]:
         text=True,
     )
 
-
 def test_real_cli_default_profile_exits_successfully() -> None:
     assert _run_cli("--top-k", "3").returncode == 0
 
@@ -139,7 +149,7 @@ def test_real_cli_default_profile_identifies_its_profile_and_mode() -> None:
     assert "VibeFinder | profile: high-energy-pop | mode: balanced" in _run_cli("--top-k", "3").stdout
 
 def test_real_cli_default_profile_has_the_expected_first_recommendation() -> None:
-    assert "1. Sunrise City — Neon Echo | 95.22/100" in _run_cli("--top-k", "3").stdout
+    assert "1. Sunrise City — Neon Echo | 94.76/100" in _run_cli("--top-k", "3").stdout
 
 
 def test_real_cli_default_profile_explains_the_first_recommendation() -> None:
@@ -184,22 +194,44 @@ def test_named_profiles_change_the_real_catalog_recommendation() -> None:
         k=1,
     )[0][0]["title"]
 
-    assert {pop_top, lofi_top, rock_top} == {"Sunrise City", "Library Rain", "Everlong"}
+    assert {pop_top, lofi_top, rock_top} == {"Sunrise City", "Library Rain", "Storm Runner"}
 
 
-def test_energy_removal_experiment_changes_a_real_song_score() -> None:
-    happy = load_songs(CATALOG_PATH)[0]
-    with_energy, _ = score_song(HIGH_ENERGY_POP, happy)
-    without_energy, _ = score_song(HIGH_ENERGY_POP, happy, include_energy=False)
+def test_energy_removal_experiment_changes_a_verified_song_score(happy_song: dict[str, object]) -> None:
+    with_energy, _ = score_song(HIGH_ENERGY_POP, happy_song)
+    without_energy, _ = score_song(HIGH_ENERGY_POP, happy_song, include_energy=False)
 
     assert with_energy != without_energy
 
 
-def test_energy_removal_experiment_explains_the_excluded_feature() -> None:
-    happy = load_songs(CATALOG_PATH)[0]
-    _, reasons = score_song(HIGH_ENERGY_POP, happy, include_energy=False)
+def test_energy_removal_experiment_explains_the_excluded_feature(happy_song: dict[str, object]) -> None:
+    _, reasons = score_song(HIGH_ENERGY_POP, happy_song, include_energy=False)
 
     assert "energy excluded for experiment" in reasons[2]
+
+
+def test_advanced_release_decade_preference_changes_a_verified_song_score(
+    happy_song: dict[str, object],
+) -> None:
+    matching_score, _ = score_song(HIGH_ENERGY_POP, happy_song)
+    earlier_era = {**HIGH_ENERGY_POP, "release_decade": 1950}
+    earlier_score, _ = score_song(earlier_era, happy_song)
+
+    assert matching_score > earlier_score
+
+
+def test_advanced_release_decade_preference_appears_in_its_reason(
+    happy_song: dict[str, object],
+) -> None:
+    _, reasons = score_song(HIGH_ENERGY_POP, happy_song)
+
+    assert "release decade similarity 1.00" in reasons[7]
+
+
+def test_advanced_mood_tags_appear_in_their_reason(happy_song: dict[str, object]) -> None:
+    _, reasons = score_song(HIGH_ENERGY_POP, happy_song)
+
+    assert "mood-tag overlap" in reasons[8]
 
 
 def test_real_cli_runs_all_named_profiles_successfully() -> None:

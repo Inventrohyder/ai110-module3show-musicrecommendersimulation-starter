@@ -17,6 +17,11 @@ DEFAULT_PROFILE = {
     "valence": 0.80,
     "danceability": 0.85,
     "likes_acoustic": False,
+    "release_decade": 2010,
+    "mood_tags": ("dance", "uplifting"),
+    "likes_instrumental": False,
+    "liveness": 0.12,
+    "speechiness": 0.05,
 }
 USER_PROFILES = {
     DEFAULT_PROFILE_NAME: DEFAULT_PROFILE,
@@ -28,6 +33,11 @@ USER_PROFILES = {
         "valence": 0.55,
         "danceability": 0.45,
         "likes_acoustic": True,
+        "release_decade": 2000,
+        "mood_tags": ("study", "warm"),
+        "likes_instrumental": True,
+        "liveness": 0.12,
+        "speechiness": 0.05,
     },
     "deep-intense-rock": {
         "genre": "rock",
@@ -37,6 +47,11 @@ USER_PROFILES = {
         "valence": 0.40,
         "danceability": 0.55,
         "likes_acoustic": False,
+        "release_decade": 1990,
+        "mood_tags": ("guitar", "intense", "anthemic"),
+        "likes_instrumental": False,
+        "liveness": 0.15,
+        "speechiness": 0.04,
     },
 }
 CATALOG_PATH = Path(__file__).resolve().parents[1] / "data" / "songs.csv"

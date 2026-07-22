@@ -14,13 +14,13 @@ VibeFinder is for classroom exploration of how a recommender turns attributes an
 
 ## 3. How the Model Works
 
-Each song has genre, mood, energy, tempo, valence, danceability, and acousticness. A profile provides a preferred genre and mood plus target values. VibeFinder gives points for genre/mood matches and partial points when numerical values are close to the target, then divides by the available points to make a 0–100 score. The final list is sorted from high to low and each row states the same contributions used by the score.
+Each song has genre, mood, energy, tempo, valence, danceability, acousticness, release decade, mood tags, instrumentalness, liveness, and speechiness. A profile provides a preferred genre and mood plus target values and tags. VibeFinder gives points for genre/mood matches, tag overlap, and numerical closeness, then divides by the available points to make a 0–100 score. The final list is sorted from high to low and each row states the same contributions used by the score.
 
 ---
 
 ## 4. Data
 
-The catalog has 20 songs across eight broad genres: the ten course-provided starter simulation entries plus ten MusicBrainz-verified recordings. Feature values are student-reviewed simulation annotations rather than provider audio analysis. The catalog is intentionally small, so many artists, languages, communities, and musical traditions are absent.
+The catalog has 20 songs across eight broad genres: the ten course-provided starter simulation entries plus ten MusicBrainz-verified recordings. Five added attributes—release decade, mood tags, instrumentalness, liveness, and speechiness—extend the original feature set. All feature values are student-reviewed simulation annotations rather than provider audio analysis. The catalog is intentionally small, so many artists, languages, communities, and musical traditions are absent.
 
 ---
 
@@ -38,13 +38,13 @@ Manual annotations and an uneven tiny catalog can encode the curator's judgement
 
 ## 7. Evaluation
 
-Automated tests load the checked-in CSV, reject a checked-in malformed CSV, compare the functional and OOP APIs, and run the real command in a subprocess. BDD scenarios exercise high-energy-pop, chill-lofi, and deep-intense-rock against the same catalog. The actual CLI runs selected Sunrise City, Library Rain, and Everlong respectively. A controlled experiment removed Happy's energy contribution: its score changed from 92.06 to 91.07, confirming that energy affects the score without being the only factor.
+Automated tests load the checked-in CSV, reject a checked-in malformed CSV, compare the functional and OOP APIs, verify that a verified song's release-decade preference affects a score, and run the real command in a subprocess. BDD scenarios exercise high-energy-pop, chill-lofi, and deep-intense-rock against the same catalog. The actual CLI runs selected Sunrise City, Library Rain, and Everlong respectively. A controlled experiment removed Happy's energy contribution: its score changed from 93.66 to 93.17, confirming that energy affects the score without being the only factor.
 
 ---
 
 ## 8. Future Work
 
-The planned extensions add five transparent attributes, a second strategy, diversity-aware selection, and a formatted explanation table. A production system would need consented interaction data, a larger balanced catalog, user studies, accessibility and language coverage, and monitoring for disparate outcomes.
+The completed five transparent attributes improve profile expressiveness, but they do not remove manual-annotation bias. The planned ranking strategy, diversity-aware selection, and formatted explanation table should be checked with the same real catalog. A production system would need consented interaction data, a larger balanced catalog, user studies, accessibility and language coverage, and monitoring for disparate outcomes.
 
 ---
 
