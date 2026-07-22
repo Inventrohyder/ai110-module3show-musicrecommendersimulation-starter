@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 from typing import Sequence
 
-from src.recommender import load_songs, recommend_songs
+from src.recommender import STRATEGIES, load_songs, recommend_songs
 
 DEFAULT_PROFILE_NAME = "high-energy-pop"
 DEFAULT_PROFILE = {
@@ -66,7 +66,7 @@ def top_k_value(value: str) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """Build the small CLI interface available before profile extensions."""
+    """Build the CLI interface for selecting profiles, modes, and top-k results."""
     parser = argparse.ArgumentParser(description="Rank VibeFinder's classroom music catalog.")
     parser.add_argument("--top-k", type=top_k_value, default=5, help="Number of recommendations (1–20).")
     parser.add_argument(
@@ -78,9 +78,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--all-profiles", action="store_true", help="Run every named profile.")
     parser.add_argument(
         "--mode",
-        choices=["balanced"],
+        choices=STRATEGIES,
         default="balanced",
-        help="Ranking mode; the energy-first extension adds another option.",
+        help="Ranking mode: balanced or energy-first.",
     )
     return parser
 

@@ -14,7 +14,7 @@ VibeFinder is for classroom exploration of how a recommender turns attributes an
 
 ## 3. How the Model Works
 
-Each song has genre, mood, energy, tempo, valence, danceability, acousticness, release decade, mood tags, instrumentalness, liveness, and speechiness. A profile provides a preferred genre and mood plus target values and tags. VibeFinder gives points for genre/mood matches, tag overlap, and numerical closeness, then divides by the available points to make a 0–100 score. The final list is sorted from high to low and each row states the same contributions used by the score.
+Each song has genre, mood, energy, tempo, valence, danceability, acousticness, release decade, mood tags, instrumentalness, liveness, and speechiness. A profile provides a preferred genre and mood plus target values and tags. VibeFinder gives points for genre/mood matches, tag overlap, and numerical closeness, then divides by the available points to make a 0–100 score. A Strategy object selects either the balanced weights or an energy-first emphasis; the final list is sorted from high to low and each row states the same contributions used by the score.
 
 ---
 
@@ -32,19 +32,19 @@ The three real CLI profiles show the intended broad behavior: the high-energy-po
 
 ## 6. Limitations and Bias
 
-Manual annotations and an uneven tiny catalog can encode the curator's judgement. Exact genre/mood matching can overfit one label and hide songs that a person might enjoy for other reasons. For example, chill-lofi still ranks Snowfall and Feather despite mood mismatches because genre and numerical similarity compensate. The catalog is also heavily English-language and has no real listener interaction data. A later artist-diversity adjustment reduces repetition but does not make a broad fairness guarantee.
+Manual annotations and an uneven tiny catalog can encode the curator's judgement. Exact genre/mood matching can overfit one label and hide songs that a person might enjoy for other reasons. For example, chill-lofi can still rank Focus Flow despite its mood mismatch because genre and numerical similarity compensate. The catalog is also heavily English-language and has no real listener interaction data. A later artist-diversity adjustment reduces repetition but does not make a broad fairness guarantee.
 
 ---
 
 ## 7. Evaluation
 
-Automated tests load the checked-in CSV, reject a checked-in malformed CSV, compare the functional and OOP APIs, verify that a verified song's release-decade preference affects a score, and run the real command in a subprocess. BDD scenarios exercise high-energy-pop, chill-lofi, and deep-intense-rock against the same catalog. The actual CLI runs selected Sunrise City, Library Rain, and Everlong respectively. A controlled experiment removed Happy's energy contribution: its score changed from 93.66 to 93.17, confirming that energy affects the score without being the only factor.
+Automated tests load the checked-in CSV, reject a checked-in malformed CSV, compare the functional and OOP APIs, verify that a verified song's release-decade preference affects a score, and run the real command in a subprocess. BDD scenarios exercise high-energy-pop, chill-lofi, and deep-intense-rock against the same catalog. The actual CLI runs selected Sunrise City, Library Rain, and Everlong respectively. A controlled experiment removed Happy's energy contribution: its score changed from 93.66 to 93.17. A second experiment confirms that energy-first moves Enter Sandman above Storm Runner in a ten-result high-energy-pop ranking.
 
 ---
 
 ## 8. Future Work
 
-The completed five transparent attributes improve profile expressiveness, but they do not remove manual-annotation bias. The planned ranking strategy, diversity-aware selection, and formatted explanation table should be checked with the same real catalog. A production system would need consented interaction data, a larger balanced catalog, user studies, accessibility and language coverage, and monitoring for disparate outcomes.
+The completed five transparent attributes and two ranking modes improve profile expressiveness, but they do not remove manual-annotation bias. Diversity-aware selection and a formatted explanation table should be checked with the same real catalog. A production system would need consented interaction data, a larger balanced catalog, user studies, accessibility and language coverage, and monitoring for disparate outcomes.
 
 ---
 

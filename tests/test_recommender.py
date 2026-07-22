@@ -9,6 +9,7 @@ import pytest
 from src.recommender import (
     Recommender,
     Song,
+    SongRecord,
     UserProfile,
     load_songs,
     recommend_songs,
@@ -38,6 +39,12 @@ HIGH_ENERGY_POP = {
 def happy_song() -> dict[str, object]:
     """Provide the checked-in MusicBrainz-verified Happy row for score experiments."""
     return load_songs(CATALOG_PATH)[10]
+
+
+@pytest.fixture
+def real_catalog() -> list[SongRecord]:
+    """Provide a fresh copy of the checked-in catalog for a real ranking scenario."""
+    return load_songs(CATALOG_PATH)
 
 
 def test_checked_in_catalog_has_twenty_rows() -> None:
@@ -244,3 +251,42 @@ def test_real_cli_runs_all_named_profiles_successfully() -> None:
 )
 def test_real_cli_includes_each_named_profile(profile_name: str) -> None:
     assert f"profile: {profile_name}" in _run_cli("--all-profiles", "--top-k", "3").stdout
+
+
+@pytest.mark.parametrize(
+    ("mode", "expected_rank_seven_title"),
+    (
+        pytest.param(
+            "balanced",
+            "Storm Runner",
+            id="balanced-rank-seven-is-storm-runner",
+        ),
+        pytest.param(
+            "energy-first",
+            "Enter Sandman",
+            id="energy-first-rank-seven-is-enter-sandman",
+        ),
+    ),
+)
+def test_ranking_strategy_places_expected_song_at_rank_seven(
+    real_catalog: list[SongRecord],
+    mode: str,
+    expected_rank_seven_title: str,
+) -> None:
+    recommendations = recommend_songs(HIGH_ENERGY_POP, real_catalog, k=10, mode=mode)
+
+    assert recommendations[6][0]["title"] == expected_rank_seven_title
+
+
+def test_real_cli_energy_first_mode_exits_successfully() -> None:
+    assert _run_cli("--mode", "energy-first", "--top-k", "3").returncode == 0
+
+
+def test_real_cli_reports_the_energy_first_mode() -> None:
+    assert "mode: energy-first" in _run_cli("--mode", "energy-first", "--top-k", "3").stdout
+
+
+def test_real_cli_energy_first_reason_uses_the_energy_weight() -> None:
+    assert "energy similarity 0.97: +24.2/25" in _run_cli(
+        "--mode", "energy-first", "--top-k", "3"
+    ).stdout
