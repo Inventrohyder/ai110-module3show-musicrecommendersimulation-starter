@@ -1,5 +1,6 @@
-from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
+from typing import Dict, List, Tuple
+
 
 @dataclass
 class Song:
