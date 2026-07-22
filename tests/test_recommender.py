@@ -138,7 +138,6 @@ def test_real_cli_default_profile_exits_successfully() -> None:
 def test_real_cli_default_profile_identifies_its_profile_and_mode() -> None:
     assert "VibeFinder | profile: high-energy-pop | mode: balanced" in _run_cli("--top-k", "3").stdout
 
-
 def test_real_cli_default_profile_has_the_expected_first_recommendation() -> None:
     assert "1. Sunrise City — Neon Echo | 95.22/100" in _run_cli("--top-k", "3").stdout
 
@@ -153,3 +152,63 @@ def test_real_cli_rejects_an_out_of_range_top_k_with_a_nonzero_status() -> None:
 
 def test_real_cli_rejects_an_out_of_range_top_k_with_a_clear_error() -> None:
     assert "top-k must be between 1 and 20" in _run_cli("--top-k", "21").stderr
+
+
+def test_named_profiles_change_the_real_catalog_recommendation() -> None:
+    songs = load_songs(CATALOG_PATH)
+    pop_top = recommend_songs(HIGH_ENERGY_POP, songs, k=1)[0][0]["title"]
+    lofi_top = recommend_songs(
+        {
+            "genre": "lofi",
+            "mood": "chill",
+            "energy": 0.30,
+            "tempo_bpm": 80,
+            "valence": 0.55,
+            "danceability": 0.45,
+            "likes_acoustic": True,
+        },
+        songs,
+        k=1,
+    )[0][0]["title"]
+    rock_top = recommend_songs(
+        {
+            "genre": "rock",
+            "mood": "intense",
+            "energy": 0.85,
+            "tempo_bpm": 145,
+            "valence": 0.40,
+            "danceability": 0.55,
+            "likes_acoustic": False,
+        },
+        songs,
+        k=1,
+    )[0][0]["title"]
+
+    assert {pop_top, lofi_top, rock_top} == {"Sunrise City", "Library Rain", "Everlong"}
+
+
+def test_energy_removal_experiment_changes_a_real_song_score() -> None:
+    happy = load_songs(CATALOG_PATH)[0]
+    with_energy, _ = score_song(HIGH_ENERGY_POP, happy)
+    without_energy, _ = score_song(HIGH_ENERGY_POP, happy, include_energy=False)
+
+    assert with_energy != without_energy
+
+
+def test_energy_removal_experiment_explains_the_excluded_feature() -> None:
+    happy = load_songs(CATALOG_PATH)[0]
+    _, reasons = score_song(HIGH_ENERGY_POP, happy, include_energy=False)
+
+    assert "energy excluded for experiment" in reasons[2]
+
+
+def test_real_cli_runs_all_named_profiles_successfully() -> None:
+    assert _run_cli("--all-profiles", "--top-k", "3").returncode == 0
+
+
+@pytest.mark.parametrize(
+    "profile_name",
+    ("high-energy-pop", "chill-lofi", "deep-intense-rock"),
+)
+def test_real_cli_includes_each_named_profile(profile_name: str) -> None:
+    assert f"profile: {profile_name}" in _run_cli("--all-profiles", "--top-k", "3").stdout
