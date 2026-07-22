@@ -1,0 +1,23 @@
+name: Delivery item
+description: Create a small, evidence-backed VibeFinder delivery item.
+title: ""
+labels: ["type:feature", "priority:p2"]
+body:
+  - type: textarea
+    attributes:
+      label: Outcome
+      description: Describe the independently reviewable behavior.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Acceptance checks
+      description: List automated and manual evidence.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Expected Graphite branch
+      placeholder: codex/feat-small-behavior
+    validations:
+      required: true
