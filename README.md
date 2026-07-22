@@ -85,7 +85,18 @@ uv run pytest
 
 ## Sample Recommendation Output
 
-The CLI output is captured from the real command in the CLI implementation layer.
+This is the actual output of `uv run python -m src.main --top-k 3` from the checked-in catalog.
+
+```text
+VibeFinder | profile: high-energy-pop | mode: balanced
+
+1. Sunrise City — Neon Echo | 95.22/100
+   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97: +11.6/12; tempo similarity 0.85: +6.8/8; valence similarity 0.96: +7.7/8; danceability similarity 0.94: +7.5/8; acoustic preference similarity 0.82: +4.9/6
+2. Happy — Pharrell Williams | 92.06/100
+   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97: +11.6/12; tempo similarity 0.62: +5.0/8; valence similarity 0.88: +7.0/8; danceability similarity 0.90: +7.2/8; acoustic preference similarity 0.90: +5.4/6
+3. Gym Hero — Max Pulse | 80.64/100
+   Why: genre match: +18.0/18; mood mismatch: +0.0/12; energy similarity 0.92: +11.0/12; tempo similarity 0.97: +7.8/8; valence similarity 0.97: +7.8/8; danceability similarity 0.97: +7.8/8; acoustic preference similarity 0.95: +5.7/6
+```
 
 **Screenshot or video** _(optional)_: <!-- Insert a screenshot or demo video link here -->
 
