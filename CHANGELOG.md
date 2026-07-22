@@ -9,3 +9,4 @@ All notable changes to VibeFinder are documented here. This project follows a sm
 - Constrained pytest to the compatible 8.x line to keep the pytest-bdd suite warning-free.
 - Reduced Trunk quality checks to a focused, non-overlapping set.
 - Configured Bandit to allow pytest assertions while retaining production-code security checks.
+- Added locked-environment tests and Trunk quality checks for pull requests and `main`.
