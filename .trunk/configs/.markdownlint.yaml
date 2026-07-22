@@ -1,0 +1,4 @@
+# Prettier friendly markdownlint config (all formatting rules disabled)
+extends: markdownlint/style/prettier
+# Captured fixed-width CLI tables and source URLs must remain verbatim evidence.
+MD013: false

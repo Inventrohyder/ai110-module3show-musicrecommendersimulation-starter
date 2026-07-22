@@ -10,3 +10,4 @@ All notable changes to VibeFinder are documented here. This project follows a sm
 - Reduced Trunk quality checks to a focused, non-overlapping set.
 - Configured Bandit to allow pytest assertions while retaining production-code security checks.
 - Added locked-environment tests and Trunk quality checks for pull requests and `main`.
+- Kept markdownlint but disabled MD013 so captured CLI tables and source URLs remain exact.
