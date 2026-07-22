@@ -20,6 +20,7 @@ I asked Codex desktop (GPT-5) to implement the approved VibeFinder delivery plan
 - Extended the shared functional/OOP scoring path in `src/recommender.py`, including validation, normalized 0–100 scoring, and explanation text for every added contribution.
 - Updated the named profiles in `src/main.py`, checked-in-catalog tests, `docs/data-provenance.md`, README weight/output evidence, and Model Card disclosure.
 - Added the planned greedy artist-exposure selection rule: every previously selected song by the same artist subtracts 15 points from a remaining candidate, and the reason text shows that adjustment.
+- Added the planned `tabulate` terminal table with rank, song, artist, mode, base score, final score, and wrapped score-derived reasons.
 
 ### What did I verify or fix manually?
 
@@ -28,6 +29,7 @@ I asked Codex desktop (GPT-5) to implement the approved VibeFinder delivery plan
 - I corrected the catalog after the user required the starter entries to be extended rather than replaced. The final catalog therefore has ten fictional course entries and ten verified additions; it does not claim that all 20 rows are real recordings.
 - I checked the chill-lofi top five and confirmed that _Focus Flow_ gets the visible `-15.0` adjustment after _Midnight Coding_ by LoRoom; I updated the README and Model Card in the same diversity layer.
 - I corrected stale documentation that referred to removed songs and artists, including the prior repeated-artist example.
+- I ran the default, all-profiles, energy-first, and chill-lofi commands after the table change; I replaced abbreviated output evidence with exact captured tables and added CLI assertions for table headers and reasons.
 
 ## Design Pattern (SF10)
 

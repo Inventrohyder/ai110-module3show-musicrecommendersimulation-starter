@@ -34,5 +34,7 @@ pytest-bdd==8.1.0
 pytest-cov==7.1.0
 six==1.17.0
     # via parse-type
+tabulate==0.10.0
+    # via vibefinder
 typing-extensions==4.16.0
     # via pytest-bdd
