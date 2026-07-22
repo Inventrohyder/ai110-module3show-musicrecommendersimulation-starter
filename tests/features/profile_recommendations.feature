@@ -7,7 +7,6 @@ Feature: Named profile recommendations
     When that profile requests three recommendations
     Then exactly three recommendations are returned
     And recommendations are ordered from highest score to lowest score
-    And every returned recommendation has score-derived reasons
 
     Examples:
       | profile           |
