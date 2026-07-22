@@ -151,6 +151,8 @@ The profile changes visibly change the results: high-energy pop rewards upbeat, 
 
 For the real song **Happy** under the high-energy-pop profile, the normal score was **92.06/100**. Calling the scorer with its energy contribution removed produced **91.07/100**. That small, measurable drop makes the energy feature's effect explicit; it also shows that the result is not driven by energy alone.
 
+The [required-rubric audit](docs/core-rubric-audit.md) maps each required point to its code, tests, and reader-facing evidence.
+
 ---
 
 ## Reflection
