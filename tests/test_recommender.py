@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from src.main import USER_PROFILES
 from src.recommender import (
     Recommender,
     Song,
@@ -39,12 +40,6 @@ HIGH_ENERGY_POP = {
 def happy_song() -> dict[str, object]:
     """Provide the checked-in MusicBrainz-verified Happy row for score experiments."""
     return load_songs(CATALOG_PATH)[10]
-
-
-@pytest.fixture
-def real_catalog() -> list[SongRecord]:
-    """Provide a fresh copy of the checked-in catalog for a real ranking scenario."""
-    return load_songs(CATALOG_PATH)
 
 
 def test_checked_in_catalog_has_twenty_rows() -> None:
@@ -289,4 +284,42 @@ def test_real_cli_reports_the_energy_first_mode() -> None:
 def test_real_cli_energy_first_reason_uses_the_energy_weight() -> None:
     assert "energy similarity 0.97: +24.2/25" in _run_cli(
         "--mode", "energy-first", "--top-k", "3"
+    ).stdout
+
+
+@pytest.fixture
+def chill_lofi_top_five(real_catalog: list[SongRecord]) -> list[tuple[SongRecord, float, str]]:
+    """Rank the checked-in catalog through the profile that demonstrates artist diversity."""
+    return recommend_songs(USER_PROFILES["chill-lofi"], real_catalog, k=5)
+
+
+@pytest.fixture
+def focus_flow_recommendation(
+    chill_lofi_top_five: list[tuple[SongRecord, float, str]],
+) -> tuple[SongRecord, float, str]:
+    """Provide Focus Flow's deterministic fifth-place diversity-adjusted result."""
+    return chill_lofi_top_five[4]
+
+
+def test_artist_diversity_penalty_reduces_a_repeated_artist_score(
+    focus_flow_recommendation: tuple[SongRecord, float, str],
+) -> None:
+    unpenalized_score, _ = score_song(USER_PROFILES["chill-lofi"], focus_flow_recommendation[0])
+
+    assert focus_flow_recommendation[1] < unpenalized_score
+
+
+def test_artist_diversity_penalty_appears_in_the_reason(
+    focus_flow_recommendation: tuple[SongRecord, float, str],
+) -> None:
+    assert "artist diversity penalty: -15.0 for 1 earlier selection(s)" in focus_flow_recommendation[2]
+
+
+def test_real_cli_artist_diversity_profile_exits_successfully() -> None:
+    assert _run_cli("--profile", "chill-lofi", "--top-k", "5").returncode == 0
+
+
+def test_real_cli_explains_artist_diversity_penalty() -> None:
+    assert "artist diversity penalty: -15.0 for 1 earlier selection(s)" in _run_cli(
+        "--profile", "chill-lofi", "--top-k", "5"
     ).stdout
