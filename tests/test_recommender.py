@@ -1,5 +1,7 @@
-"""Behavior-focused tests over VibeFinder's checked-in catalog and APIs."""
+"""Behavior-focused tests over VibeFinder's checked-in catalog and real CLI."""
 
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -15,6 +17,7 @@ from src.recommender import (
 
 CATALOG_PATH = Path(__file__).parents[1] / "data" / "songs.csv"
 MALFORMED_CATALOG_PATH = Path(__file__).parent / "fixtures" / "malformed_songs.csv"
+PROJECT_ROOT = Path(__file__).parents[1]
 HIGH_ENERGY_POP = {
     "genre": "pop",
     "mood": "happy",
@@ -116,3 +119,37 @@ def test_real_song_score_explanation_includes_energy() -> None:
     _, reasons = score_song(HIGH_ENERGY_POP, load_songs(CATALOG_PATH)[0])
 
     assert "energy similarity" in reasons[2]
+
+
+def _run_cli(*arguments: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, "-m", "src.main", *arguments],
+        cwd=PROJECT_ROOT,
+        capture_output=True,
+        check=False,
+        text=True,
+    )
+
+
+def test_real_cli_default_profile_exits_successfully() -> None:
+    assert _run_cli("--top-k", "3").returncode == 0
+
+
+def test_real_cli_default_profile_identifies_its_profile_and_mode() -> None:
+    assert "VibeFinder | profile: high-energy-pop | mode: balanced" in _run_cli("--top-k", "3").stdout
+
+
+def test_real_cli_default_profile_has_the_expected_first_recommendation() -> None:
+    assert "1. Sunrise City — Neon Echo | 95.22/100" in _run_cli("--top-k", "3").stdout
+
+
+def test_real_cli_default_profile_explains_the_first_recommendation() -> None:
+    assert "Why: genre match: +18.0/18" in _run_cli("--top-k", "3").stdout
+
+
+def test_real_cli_rejects_an_out_of_range_top_k_with_a_nonzero_status() -> None:
+    assert _run_cli("--top-k", "21").returncode != 0
+
+
+def test_real_cli_rejects_an_out_of_range_top_k_with_a_clear_error() -> None:
+    assert "top-k must be between 1 and 20" in _run_cli("--top-k", "21").stderr
