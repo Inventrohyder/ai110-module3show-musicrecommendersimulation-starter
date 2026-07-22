@@ -19,13 +19,15 @@ I asked Codex desktop (GPT-5) to implement the approved VibeFinder delivery plan
 - Preserved the ten course starter entries and extended `data/songs.csv` with ten MusicBrainz-verified recordings. The five added attributes—`release_decade`, `mood_tags`, `instrumentalness`, `liveness`, and `speechiness`—are present for all 20 catalog rows as student-reviewed simulation annotations.
 - Extended the shared functional/OOP scoring path in `src/recommender.py`, including validation, normalized 0–100 scoring, and explanation text for every added contribution.
 - Updated the named profiles in `src/main.py`, checked-in-catalog tests, `docs/data-provenance.md`, README weight/output evidence, and Model Card disclosure.
+- Added the planned greedy artist-exposure selection rule: every previously selected song by the same artist subtracts 15 points from a remaining candidate, and the reason text shows that adjustment.
 
 ### What did I verify or fix manually?
 
 - I reviewed the MusicBrainz identity and release-year sources for the ten added recordings in `docs/data-provenance.md` and kept all descriptor values explicitly labelled as classroom simulation annotations.
 - I ran `uv run pytest`, `uv run python -m src.main --all-profiles --top-k 3`, and `trunk check` against the changed files. I also compared captured README tables with real CLI output rather than treating generated prose as evidence.
 - I corrected the catalog after the user required the starter entries to be extended rather than replaced. The final catalog therefore has ten fictional course entries and ten verified additions; it does not claim that all 20 rows are real recordings.
-- I corrected stale documentation that referred to removed songs and artists. The final diversity evidence is the visible `-15.0` adjustment for _Focus Flow_ after _Midnight Coding_ by LoRoom, not a Nujabes example.
+- I checked the chill-lofi top five and confirmed that _Focus Flow_ gets the visible `-15.0` adjustment after _Midnight Coding_ by LoRoom; I updated the README and Model Card in the same diversity layer.
+- I corrected stale documentation that referred to removed songs and artists, including the prior repeated-artist example.
 
 ## Design Pattern (SF10)
 

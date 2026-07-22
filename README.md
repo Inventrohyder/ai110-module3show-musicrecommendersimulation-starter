@@ -66,7 +66,7 @@ The extended profile and catalog add release decade, mood tags, instrumentalness
 
 ### Ranking modes
 
-`balanced` is the default. `energy-first` is a Strategy implementation that uses the same scoring engine but shifts weight from genre and mood toward energy and tempo.
+`balanced` is the default Strategy. `energy-first` shifts weight from genre/mood to energy/tempo while retaining the same scorer and explanation format. In a ten-result high-energy-pop run, balanced ranks **Storm Runner** ahead of **Enter Sandman**; energy-first reverses them.
 
 | Feature              | Balanced | Energy-first |
 | -------------------- | -------: | -----------: |
@@ -74,6 +74,10 @@ The extended profile and catalog add release decade, mood tags, instrumentalness
 | Energy / tempo       |   12 / 8 |      25 / 15 |
 | Remaining attributes |       44 |           37 |
 | **Total**            |   **94** |       **97** |
+
+### Exposure diversity
+
+After scoring, VibeFinder selects rows greedily. Each earlier selection by the same artist subtracts **15 points** from that artist's remaining candidates. For the chill-lofi profile, **Focus Flow** follows **Midnight Coding** by LoRoom and shows the visible `-15.0` penalty. This improves exposure diversity in one list; it does not correct catalog representation gaps or claim universal fairness.
 
 The scorer returns both the numeric result and each feature contribution, so a reason like `energy similarity 0.97: +11.6/12` can be checked directly against the algorithm.
 

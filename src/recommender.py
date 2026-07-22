@@ -40,6 +40,7 @@ ENERGY_FIRST_WEIGHTS = {
     "liveness": 3.0,
     "speechiness": 3.0,
 }
+ARTIST_DIVERSITY_PENALTY = 15.0
 REQUIRED_COLUMNS = (
     "id",
     "title",
@@ -487,13 +488,32 @@ def recommend_songs(
     k: int = 5,
     mode: str = "balanced",
 ) -> list[tuple[SongRecord, float, str]]:
-    """Score every song and return a deterministic, descending top-k list."""
+    """Score every song and greedily select a deterministic, artist-diverse top-k list."""
     strategy = get_strategy(mode)
     if not 1 <= k <= len(songs):
         raise ValueError(f"k must be between 1 and {len(songs)}")
-    scored = []
+    remaining = []
     for song in songs:
         record = song.to_record() if isinstance(song, Song) else validate_song_record(song)
         score, reasons = score_song(user_prefs, record, strategy=strategy)
-        scored.append((record, score, "; ".join(reasons)))
-    return sorted(scored, key=lambda item: (-item[1], item[0]["title"].casefold()))[:k]
+        remaining.append((record, score, "; ".join(reasons)))
+
+    selected = []
+    selected_artist_counts: dict[str, int] = {}
+    while len(selected) < k:
+        def adjusted_score(item: tuple[SongRecord, float, str]) -> float:
+            artist_count = selected_artist_counts.get(item[0]["artist"].casefold(), 0)
+            return item[1] - ARTIST_DIVERSITY_PENALTY * artist_count
+
+        candidate = min(remaining, key=lambda item: (-adjusted_score(item), item[0]["title"].casefold()))
+        record, base_score, explanation = candidate
+        artist_key = record["artist"].casefold()
+        prior_artist_count = selected_artist_counts.get(artist_key, 0)
+        penalty = ARTIST_DIVERSITY_PENALTY * prior_artist_count
+        final_score = round(base_score - penalty, 2)
+        if penalty:
+            explanation = f"{explanation}; artist diversity penalty: -{penalty:.1f} for {prior_artist_count} earlier selection(s)"
+        selected.append((record, final_score, explanation))
+        selected_artist_counts[artist_key] = prior_artist_count + 1
+        remaining.remove(candidate)
+    return selected
