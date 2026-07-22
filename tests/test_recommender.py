@@ -200,36 +200,6 @@ def test_real_cli_rejects_an_out_of_range_top_k_with_a_clear_error(
 
 
 @pytest.mark.parametrize(
-    ("profile_name", "expected_top_title"),
-    (
-        pytest.param(
-            "high-energy-pop",
-            "Sunrise City",
-            id="high-energy-pop-selects-sunrise-city",
-        ),
-        pytest.param(
-            "chill-lofi",
-            "Library Rain",
-            id="chill-lofi-selects-library-rain",
-        ),
-        pytest.param(
-            "deep-intense-rock",
-            "Everlong",
-            id="deep-intense-rock-selects-everlong",
-        ),
-    ),
-)
-def test_named_profile_selects_the_expected_real_catalog_song(
-    real_catalog: list[SongRecord],
-    profile_name: str,
-    expected_top_title: str,
-) -> None:
-    recommendation = recommend_songs(USER_PROFILES[profile_name], real_catalog, k=1)[0]
-
-    assert recommendation[0]["title"] == expected_top_title
-
-
-@pytest.mark.parametrize(
     "profile_name",
     (
         pytest.param("high-energy-pop", id="high-energy-pop"),

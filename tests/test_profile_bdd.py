@@ -1,39 +1,53 @@
-"""BDD coverage for VibeFinder's named profiles over its real catalog."""
+"""End-to-end BDD coverage for VibeFinder's named-profile CLI journeys."""
 
-from pytest_bdd import given, parsers, scenarios, then, when
+import re
+import subprocess
+from collections.abc import Callable
 
-from src.main import USER_PROFILES
-from src.recommender import SongRecord, recommend_songs
+from pytest_bdd import parsers, scenarios, then, when
 
 scenarios("features/profile_recommendations.feature")
 
-@given("the checked-in VibeFinder catalog", target_fixture="songs")
-def checked_in_catalog(real_catalog: list[SongRecord]) -> list[SongRecord]:
-    """Load the actual catalog used by the command-line application."""
-    return real_catalog
+CliRunner = Callable[..., subprocess.CompletedProcess[str]]
 
 
-@given(parsers.parse('the "{profile_name}" profile'), target_fixture="profile")
-def named_profile(profile_name: str) -> SongRecord:
-    """Select one real named profile rather than constructing test-only data."""
-    return USER_PROFILES[profile_name]
+@when(
+    parsers.parse('I run the VibeFinder CLI for the "{profile_name}" profile'),
+    target_fixture="cli_result",
+)
+def run_named_profile_cli(
+    run_cli: CliRunner,
+    profile_name: str,
+) -> subprocess.CompletedProcess[str]:
+    """Exercise the actual command-line entry point for one named listener."""
+    return run_cli("--profile", profile_name, "--top-k", "3")
 
 
-@when("that profile requests three recommendations", target_fixture="recommendations")
-def rank_named_profile(
-    profile: SongRecord, songs: list[SongRecord]
-) -> list[tuple[SongRecord, float, str]]:
-    """Rank the checked-in data through the public functional API."""
-    return recommend_songs(profile, songs, k=3)
+@then("the CLI exits successfully")
+def cli_exits_successfully(cli_result: subprocess.CompletedProcess[str]) -> None:
+    """Verify that the user-facing command completed successfully."""
+    assert cli_result.returncode == 0
 
 
-@then("exactly three recommendations are returned")
-def has_three_recommendations(recommendations: list[tuple[SongRecord, float, str]]) -> None:
-    """Verify the requested top-k boundary."""
-    assert len(recommendations) == 3
+@then(parsers.parse('the output identifies the "{profile_name}" profile'))
+def output_identifies_profile(cli_result: subprocess.CompletedProcess[str], profile_name: str) -> None:
+    """Verify the profile label shown to a CLI user."""
+    assert f"profile: {profile_name}" in cli_result.stdout
 
 
-@then("recommendations are ordered from highest score to lowest score")
-def is_descending(recommendations: list[tuple[SongRecord, float, str]]) -> None:
-    """Verify the observable rank ordering."""
-    assert recommendations[0][1] >= recommendations[1][1] >= recommendations[2][1]
+@then(parsers.parse('the first table recommendation is "{song_title}"'))
+def output_includes_first_table_recommendation(
+    cli_result: subprocess.CompletedProcess[str],
+    song_title: str,
+) -> None:
+    """Verify the first rendered table row without constructing a test-only result."""
+    assert re.search(rf"│\s*1\s*│\s*{re.escape(song_title)}\s*│", cli_result.stdout)
+
+
+@then(parsers.parse('the table shows the "{reason_fragment}" contribution'))
+def output_includes_score_reason(
+    cli_result: subprocess.CompletedProcess[str],
+    reason_fragment: str,
+) -> None:
+    """Verify that the actual table exposes a score-derived reason."""
+    assert reason_fragment in cli_result.stdout

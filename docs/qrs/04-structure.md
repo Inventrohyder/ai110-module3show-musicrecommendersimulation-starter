@@ -10,7 +10,7 @@ data/
   songs.csv            verified classroom catalog and annotations
 tests/
   test_recommender.py  real-catalog integration and CLI tests
-  features/            BDD scenarios over the checked-in catalog
+  features/            BDD scenarios that drive the real CLI subprocess
 docs/
   qrs/                 decision-stage artifacts
   decisions/           individual MADR records
