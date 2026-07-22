@@ -1,111 +1,53 @@
-# 🎧 Model Card: Music Recommender Simulation
+# Model Card: VibeFinder
 
 ## 1. Model Name
 
-Give your model a short, descriptive name.  
-Example: **VibeFinder 1.0**
+**VibeFinder 1.0** is an explainable, content-based music recommender simulation.
 
 ---
 
 ## 2. Intended Use
 
-Describe what your recommender is designed to do and who it is for.
-
-Prompts:
-
-- What kind of recommendations does it generate
-- What assumptions does it make about the user
-- Is this for real users or classroom exploration
+VibeFinder is for classroom exploration of how a recommender turns attributes and stated preferences into a ranked list. It recommends songs from a fixed 20-recording catalog for a user who supplies a genre, mood, and numeric taste targets. It is not a streaming product or a prediction about real listeners.
 
 ---
 
 ## 3. How the Model Works
 
-Explain your scoring approach in simple language.
-
-Prompts:
-
-- What features of each song are used (genre, energy, mood, etc.)
-- What user preferences are considered
-- How does the model turn those into a score
-- What changes did you make from the starter logic
-
-Avoid code here. Pretend you are explaining the idea to a friend who does not program.
+Each song has genre, mood, energy, tempo, valence, danceability, and acousticness. A profile provides a preferred genre and mood plus target values. VibeFinder gives points for genre/mood matches and partial points when numerical values are close to the target, then divides by the available points to make a 0–100 score. The final list is sorted from high to low and each row states the same contributions used by the score.
 
 ---
 
 ## 4. Data
 
-Describe the dataset the model uses.
-
-Prompts:
-
-- How many songs are in the catalog
-- What genres or moods are represented
-- Did you add or remove data
-- Are there parts of musical taste missing in the dataset
+The catalog has 20 songs across eight broad genres: the ten course-provided starter simulation entries plus ten MusicBrainz-verified recordings. Feature values are student-reviewed simulation annotations rather than provider audio analysis. The catalog is intentionally small, so many artists, languages, communities, and musical traditions are absent.
 
 ---
 
 ## 5. Strengths
 
-Where does your system seem to work well
-
-Prompts:
-
-- User types for which it gives reasonable results
-- Any patterns you think your scoring captures correctly
-- Cases where the recommendations matched your intuition
+The completed profile evaluation will record observed strengths from real CLI runs.
 
 ---
 
 ## 6. Limitations and Bias
 
-Where the system struggles or behaves unfairly.
-
-Prompts:
-
-- Features it does not consider
-- Genres or moods that are underrepresented
-- Cases where the system overfits to one preference
-- Ways the scoring might unintentionally favor some users
+Manual annotations and an uneven tiny catalog can encode the curator's judgement. Exact genre/mood matching can overfit one label and hide songs that a person might enjoy for other reasons. The later evaluation adds a controlled experiment and a documented diversity adjustment.
 
 ---
 
 ## 7. Evaluation
 
-How you checked whether the recommender behaved as expected.
-
-Prompts:
-
-- Which user profiles you tested
-- What you looked for in the recommendations
-- What surprised you
-- Any simple tests or comparisons you ran
-
-No need for numeric metrics unless you created some.
+The checked-in catalog is loaded and ranked in automated integration tests; the completed evaluation will add three distinct CLI profile runs.
 
 ---
 
 ## 8. Future Work
 
-Ideas for how you would improve the model next.
-
-Prompts:
-
-- Additional features or preferences
-- Better ways to explain recommendations
-- Improving diversity among the top results
-- Handling more complex user tastes
+The planned extensions add five transparent attributes, a second strategy, diversity-aware selection, and a formatted explanation table. A production system would need consented interaction data, a larger balanced catalog, user studies, and monitoring for disparate outcomes.
 
 ---
 
 ## 9. Personal Reflection
 
-A few sentences about your experience.
-
-Prompts:
-
-- What you learned about recommender systems
-- Something unexpected or interesting you discovered
-- How this changed the way you think about music recommendation apps
+The completed profile evaluation will add the student's reflection after examining actual outputs.
