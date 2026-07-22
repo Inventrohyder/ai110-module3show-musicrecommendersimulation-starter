@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-In this project you will build and explain a small music recommender system.
+VibeFinder is an explainable, content-based music recommender built for the AI110 classroom project. It ranks a deliberately small catalog against a stated taste profile; it does not learn from users or connect to a streaming service.
 
 Your goal is to:
 
@@ -11,23 +11,47 @@ Your goal is to:
 - Evaluate what your system gets right and wrong
 - Reflect on how this mirrors real world AI recommenders
 
-Replace this paragraph with your own summary of what your version does.
-
 ---
 
 ## How The System Works
 
-Explain your design in plain language.
+Services such as Spotify and YouTube combine **input data**—song features, listening history, skips, saves, searches, and context—with **user preferences** inferred from those signals. A candidate-generation step finds plausible songs, then a ranking model estimates which candidate is most useful for the specific person and moment. The system selects the highest-ranked results while often applying diversity, safety, or business rules.
 
-Some prompts to answer:
+VibeFinder uses content-based filtering: it compares the attributes stored for each song with a named listener profile. Unlike collaborative filtering, it does not learn from patterns across many listeners because this classroom catalog has no interaction history. The implementation keeps the three ideas separate: song attributes are inputs, the named profile expresses preferences, and the scorer/ranker selects the top results.
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+### Catalog and data flow
 
-You can include a simple diagram or bullet list if helpful.
+The checked-in CSV preserves the starter's ten course-provided simulation songs and extends them with ten MusicBrainz-verified recordings. Its 20 rows span pop, lofi, rock, electronic, ambient, jazz, indie pop, and synthwave. Each row has genre, mood, energy, tempo, valence, danceability, and acousticness. Identity and release-year provenance for the added recordings, plus the annotation policy for every row, are in [data provenance](docs/data-provenance.md).
+
+```text
+CSV song attributes + named user preferences
+                    │
+                    ▼
+            score every catalog row
+                    │
+                    ▼
+     sort by score (then title for stable ties)
+                    │
+                    ▼
+       top-k songs with score-derived reasons
+```
+
+### Core scoring rule
+
+The balanced score normalizes its earned points to 0–100. Categorical features match exactly; numeric features use linear closeness. Tempo reaches zero contribution when it is 80 BPM or more away from the target. Acousticness is compared with `1.0` for an acoustic-preferring listener and `0.0` otherwise.
+
+| Feature                | Weight |
+| ---------------------- | -----: |
+| Genre match            |     18 |
+| Mood match             |     12 |
+| Energy closeness       |     12 |
+| Tempo closeness        |      8 |
+| Valence closeness      |      8 |
+| Danceability closeness |      8 |
+| Acoustic preference    |      6 |
+| **Total**              | **72** |
+
+The scorer returns both the numeric result and each feature contribution, so a reason like `energy similarity 0.97: +11.6/12` can be checked directly against the algorithm.
 
 ---
 
@@ -38,7 +62,7 @@ You can include a simple diagram or bullet list if helpful.
 1. Install [uv](https://docs.astral.sh/uv/) and sync the locked development environment:
 
    ```bash
-   uv sync
+   uv sync --locked --all-groups
    ```
 
 2. Run the app:
@@ -51,28 +75,17 @@ For a pip-only course environment, install the generated fallback export with `p
 
 ### Running Tests
 
-Run the starter tests with:
+Run the real-data and CLI tests with:
 
 ```bash
 uv run pytest
 ```
 
-You can add more tests in `tests/test_recommender.py`.
-
 ---
 
 ## Sample Recommendation Output
 
-Paste a sample of your recommender's output here as a text block so a reader can see what it produces:
-
-```text
-# e.g.:
-# User profile: genre=indie, mood=chill, energy=low
-# Recommendations:
-#   1. ...
-#   2. ...
-#   3. ...
-```
+The CLI output is captured from the real command in the CLI implementation layer.
 
 **Screenshot or video** _(optional)_: <!-- Insert a screenshot or demo video link here -->
 
@@ -80,35 +93,16 @@ Paste a sample of your recommender's output here as a text block so a reader can
 
 ## Experiments You Tried
 
-Use this section to document the experiments you ran. For example:
-
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+The profile and scoring experiments are documented with their actual output in the corresponding implementation layers.
 
 ---
 
 ## Limitations and Risks
 
-Summarize some limitations of your recommender.
-
-Examples:
-
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
-
-You will go deeper on this in your model card.
+This is a small, manually annotated catalog. It does not understand lyrics, cultural context, production quality, accessibility needs, or changing taste. It can over-reward a profile's explicitly stated features and cannot make a collaborative-filtering claim without real interaction data. The completed [Model Card](model_card.md) expands on these limitations and planned mitigations.
 
 ---
 
 ## Reflection
 
-Read and complete `model_card.md`:
-
-[**Model Card**](model_card.md)
-
-Write 1 to 2 paragraphs here about what you learned:
-
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
+The assignment's required reflection is the completed [Model Card](model_card.md). It records the intended purpose, algorithm, limitations, and improvement ideas without maintaining a second, potentially inconsistent reflection document.
