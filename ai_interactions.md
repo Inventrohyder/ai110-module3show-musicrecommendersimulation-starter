@@ -30,7 +30,7 @@ I asked Codex desktop (GPT-5) to implement the approved VibeFinder delivery plan
 - I checked the chill-lofi top five and confirmed that _Focus Flow_ gets the visible `-15.0` adjustment after _Midnight Coding_ by LoRoom; I updated the README and Model Card in the same diversity layer.
 - I corrected stale documentation that referred to removed songs and artists, including the prior repeated-artist example.
 - I ran the default, all-profiles, energy-first, and chill-lofi commands after the table change; I replaced abbreviated output evidence with exact captured tables and added CLI assertions for table headers and reasons.
-- After review feedback, I replaced test-side recommendation searches and repeated CLI helpers with real-data pytest fixtures and named `pytest.param` cases. The BDD scenarios now cover the profile flow, count, and ordering; 18 named integration cases independently verify each profile/rank/reason combination. I re-ran `uv run pytest` and `trunk check`; that audit also corrected one stale deep-intense-rock expectation from _Storm Runner_ to the actual current result, _Everlong_.
+- After review feedback, I replaced test-side recommendation searches and repeated CLI helpers with real-data pytest fixtures and named `pytest.param` cases. The BDD scenarios now launch the actual named-profile CLI commands and verify the visible profile, first table recommendation, and score-derived reason; 18 named integration cases independently verify each profile/rank/reason combination. I re-ran `uv run pytest` and `trunk check`; that audit also corrected one stale deep-intense-rock expectation from _Storm Runner_ to the actual current result, _Everlong_.
 
 ## Design Pattern (SF10)
 

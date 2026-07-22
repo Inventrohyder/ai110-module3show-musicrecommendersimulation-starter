@@ -105,11 +105,13 @@ For a pip-only course environment, install the generated fallback export with `p
 
 ### Running Tests
 
-Run the real-data and CLI tests with:
+Run the real-data, CLI, and end-to-end BDD tests with:
 
 ```bash
 uv run pytest
 ```
+
+The named-profile BDD scenarios launch the real `python -m src.main` command in a subprocess and verify the displayed profile, first table recommendation, and score-derived reason. The remaining integration tests cover CSV validation and the required functional/OOP APIs directly.
 
 ---
 
