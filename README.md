@@ -35,31 +35,26 @@ You can include a simple diagram or bullet list if helpful.
 
 ### Setup
 
-1. Create a virtual environment (optional but recommended):
+1. Install [uv](https://docs.astral.sh/uv/) and sync the locked development environment:
 
    ```bash
-   python -m venv .venv
-   source .venv/bin/activate      # Mac or Linux
-   .venv\Scripts\activate         # Windows
+   uv sync
+   ```
 
-2. Install dependencies
+2. Run the app:
 
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   uv run python -m src.main
+   ```
 
-3. Run the app:
-
-```bash
-python -m src.main
-```
+For a pip-only course environment, install the generated fallback export with `pip install -r requirements-dev.txt`.
 
 ### Running Tests
 
 Run the starter tests with:
 
 ```bash
-pytest
+uv run pytest
 ```
 
 You can add more tests in `tests/test_recommender.py`.
@@ -117,6 +112,5 @@ Write 1 to 2 paragraphs here about what you learned:
 
 - about how recommenders turn data into predictions
 - about where bias or unfairness could show up in systems like this
-
 
 
