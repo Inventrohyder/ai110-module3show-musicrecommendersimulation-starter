@@ -16,3 +16,4 @@ All notable changes to VibeFinder are documented here. This project follows a sm
 - Added three profile evaluations, BDD scenarios, and a controlled energy-feature experiment.
 - Audited all required-rubric evidence before starting stretch work.
 - Added five validated advanced song attributes and their transparent score contributions.
+- Added selectable balanced and energy-first ranking strategies.

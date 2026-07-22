@@ -25,8 +25,21 @@ ADVANCED_WEIGHTS = {
     "liveness": 4.0,
     "speechiness": 4.0,
 }
-CORE_WEIGHT_TOTAL = sum(CORE_WEIGHTS.values())
-TOTAL_WEIGHT = CORE_WEIGHT_TOTAL + sum(ADVANCED_WEIGHTS.values())
+BALANCED_WEIGHTS = {**CORE_WEIGHTS, **ADVANCED_WEIGHTS}
+ENERGY_FIRST_WEIGHTS = {
+    "genre": 12.0,
+    "mood": 8.0,
+    "energy": 25.0,
+    "tempo": 15.0,
+    "valence": 8.0,
+    "danceability": 8.0,
+    "acousticness": 4.0,
+    "release_decade": 4.0,
+    "mood_tags": 4.0,
+    "instrumentalness": 3.0,
+    "liveness": 3.0,
+    "speechiness": 3.0,
+}
 REQUIRED_COLUMNS = (
     "id",
     "title",
@@ -53,6 +66,50 @@ UNIT_INTERVAL_FIELDS = (
     "liveness",
     "speechiness",
 )
+
+
+class RankingStrategy:
+    """A named, self-contained set of feature weights for one ranking mode."""
+
+    def __init__(self, name: str, weights: Mapping[str, float]):
+        self.name = name
+        self.weights = dict(weights)
+
+    @property
+    def total_weight(self) -> float:
+        """Return the normalization denominator for this strategy."""
+        return sum(self.weights.values())
+
+
+class BalancedStrategy(RankingStrategy):
+    """The general-purpose mode that gives every supported feature its documented weight."""
+
+    def __init__(self) -> None:
+        super().__init__("balanced", BALANCED_WEIGHTS)
+
+
+class EnergyFirstStrategy(RankingStrategy):
+    """A mode that makes energy and tempo the strongest ranking signals."""
+
+    def __init__(self) -> None:
+        super().__init__("energy-first", ENERGY_FIRST_WEIGHTS)
+
+
+STRATEGIES = {
+    "balanced": BalancedStrategy(),
+    "energy-first": EnergyFirstStrategy(),
+}
+
+
+def get_strategy(strategy: str | RankingStrategy) -> RankingStrategy:
+    """Resolve a public mode name or accept a strategy object for direct use."""
+    if isinstance(strategy, RankingStrategy):
+        return strategy
+    try:
+        return STRATEGIES[strategy]
+    except KeyError as error:
+        choices = ", ".join(STRATEGIES)
+        raise ValueError(f"unknown ranking mode {strategy!r}; choose one of: {choices}") from error
 
 
 @dataclass(frozen=True)
@@ -142,15 +199,15 @@ class Recommender:
     def __init__(self, songs: Sequence[Song]):
         self.songs = list(songs)
 
-    def recommend(self, user: UserProfile, k: int = 5) -> list[Song]:
+    def recommend(self, user: UserProfile, k: int = 5, mode: str = "balanced") -> list[Song]:
         """Return the same ranked songs as :func:`recommend_songs`."""
-        ranked = recommend_songs(user.to_preferences(), [song.to_record() for song in self.songs], k)
+        ranked = recommend_songs(user.to_preferences(), [song.to_record() for song in self.songs], k, mode)
         by_id = {song.id: song for song in self.songs}
         return [by_id[record["id"]] for record, _, _ in ranked]
 
-    def explain_recommendation(self, user: UserProfile, song: Song) -> str:
+    def explain_recommendation(self, user: UserProfile, song: Song, mode: str = "balanced") -> str:
         """Explain this song using the same score contributions used for ranking."""
-        _, reasons = score_song(user.to_preferences(), song.to_record())
+        _, reasons = score_song(user.to_preferences(), song.to_record(), strategy=mode)
         return "; ".join(reasons)
 
 
@@ -319,88 +376,90 @@ def _feature_reason(name: str, earned: float, weight: float, detail: str) -> str
 
 
 def score_song(
-    user_prefs: Mapping[str, Any], song: Mapping[str, Any] | Song, *, include_energy: bool = True
+    user_prefs: Mapping[str, Any],
+    song: Mapping[str, Any] | Song,
+    *,
+    strategy: str | RankingStrategy = "balanced",
+    include_energy: bool = True,
 ) -> tuple[float, list[str]]:
     """Return a 0–100 content score and the exact contributions that produced it."""
     record = song.to_record() if isinstance(song, Song) else validate_song_record(song)
     preferences = _normalize_preferences(user_prefs)
+    ranking_strategy = get_strategy(strategy)
+    weights = ranking_strategy.weights
     reasons = []
 
     genre_match = record["genre"].casefold() == preferences["genre"].casefold()
-    genre_score = CORE_WEIGHTS["genre"] if genre_match else 0.0
-    reasons.append(
-        _feature_reason("genre", genre_score, CORE_WEIGHTS["genre"], "match" if genre_match else "mismatch")
-    )
+    genre_score = weights["genre"] if genre_match else 0.0
+    reasons.append(_feature_reason("genre", genre_score, weights["genre"], "match" if genre_match else "mismatch"))
 
     mood_match = record["mood"].casefold() == preferences["mood"].casefold()
-    mood_score = CORE_WEIGHTS["mood"] if mood_match else 0.0
-    reasons.append(
-        _feature_reason("mood", mood_score, CORE_WEIGHTS["mood"], "match" if mood_match else "mismatch")
-    )
+    mood_score = weights["mood"] if mood_match else 0.0
+    reasons.append(_feature_reason("mood", mood_score, weights["mood"], "match" if mood_match else "mismatch"))
 
-    energy_weight = CORE_WEIGHTS["energy"] if include_energy else 0.0
+    energy_weight = weights["energy"] if include_energy else 0.0
     energy_similarity = _similarity(record["energy"], preferences["energy"], 1.0)
     energy_score = energy_weight * energy_similarity
     energy_detail = f"similarity {energy_similarity:.2f}" if include_energy else "excluded for experiment"
     reasons.append(_feature_reason("energy", energy_score, energy_weight, energy_detail))
 
     tempo_similarity = _similarity(record["tempo_bpm"], preferences["tempo_bpm"], 80.0)
-    tempo_score = CORE_WEIGHTS["tempo"] * tempo_similarity
-    reasons.append(_feature_reason("tempo", tempo_score, CORE_WEIGHTS["tempo"], f"similarity {tempo_similarity:.2f}"))
+    tempo_score = weights["tempo"] * tempo_similarity
+    reasons.append(_feature_reason("tempo", tempo_score, weights["tempo"], f"similarity {tempo_similarity:.2f}"))
 
     valence_similarity = _similarity(record["valence"], preferences["valence"], 1.0)
-    valence_score = CORE_WEIGHTS["valence"] * valence_similarity
-    reasons.append(_feature_reason("valence", valence_score, CORE_WEIGHTS["valence"], f"similarity {valence_similarity:.2f}"))
+    valence_score = weights["valence"] * valence_similarity
+    reasons.append(_feature_reason("valence", valence_score, weights["valence"], f"similarity {valence_similarity:.2f}"))
 
     dance_similarity = _similarity(record["danceability"], preferences["danceability"], 1.0)
-    dance_score = CORE_WEIGHTS["danceability"] * dance_similarity
+    dance_score = weights["danceability"] * dance_similarity
     reasons.append(
-        _feature_reason("danceability", dance_score, CORE_WEIGHTS["danceability"], f"similarity {dance_similarity:.2f}")
+        _feature_reason("danceability", dance_score, weights["danceability"], f"similarity {dance_similarity:.2f}")
     )
 
     acoustic_target = 1.0 if preferences["likes_acoustic"] else 0.0
     acoustic_similarity = _similarity(record["acousticness"], acoustic_target, 1.0)
-    acoustic_score = CORE_WEIGHTS["acousticness"] * acoustic_similarity
+    acoustic_score = weights["acousticness"] * acoustic_similarity
     reasons.append(
-        _feature_reason("acoustic preference", acoustic_score, CORE_WEIGHTS["acousticness"], f"similarity {acoustic_similarity:.2f}")
+        _feature_reason("acoustic preference", acoustic_score, weights["acousticness"], f"similarity {acoustic_similarity:.2f}")
     )
 
     decade_similarity = _similarity(record["release_decade"], preferences["release_decade"], 40.0)
-    decade_score = ADVANCED_WEIGHTS["release_decade"] * decade_similarity
+    decade_score = weights["release_decade"] * decade_similarity
     reasons.append(
-        _feature_reason("release decade", decade_score, ADVANCED_WEIGHTS["release_decade"], f"similarity {decade_similarity:.2f}")
+        _feature_reason("release decade", decade_score, weights["release_decade"], f"similarity {decade_similarity:.2f}")
     )
 
     shared_tags = set(record["mood_tags"]) & set(preferences["mood_tags"])
     tag_similarity = len(shared_tags) / len(preferences["mood_tags"])
-    tag_score = ADVANCED_WEIGHTS["mood_tags"] * tag_similarity
+    tag_score = weights["mood_tags"] * tag_similarity
     reasons.append(
-        _feature_reason("mood-tag overlap", tag_score, ADVANCED_WEIGHTS["mood_tags"], f"similarity {tag_similarity:.2f}")
+        _feature_reason("mood-tag overlap", tag_score, weights["mood_tags"], f"similarity {tag_similarity:.2f}")
     )
 
     instrumental_target = 1.0 if preferences["likes_instrumental"] else 0.0
     instrumental_similarity = _similarity(record["instrumentalness"], instrumental_target, 1.0)
-    instrumental_score = ADVANCED_WEIGHTS["instrumentalness"] * instrumental_similarity
+    instrumental_score = weights["instrumentalness"] * instrumental_similarity
     reasons.append(
         _feature_reason(
             "instrumental preference",
             instrumental_score,
-            ADVANCED_WEIGHTS["instrumentalness"],
+            weights["instrumentalness"],
             f"similarity {instrumental_similarity:.2f}",
         )
     )
 
     liveness_similarity = _similarity(record["liveness"], preferences["liveness"], 1.0)
-    liveness_score = ADVANCED_WEIGHTS["liveness"] * liveness_similarity
+    liveness_score = weights["liveness"] * liveness_similarity
     reasons.append(
-        _feature_reason("liveness", liveness_score, ADVANCED_WEIGHTS["liveness"], f"similarity {liveness_similarity:.2f}")
+        _feature_reason("liveness", liveness_score, weights["liveness"], f"similarity {liveness_similarity:.2f}")
     )
 
     speechiness_similarity = _similarity(record["speechiness"], preferences["speechiness"], 1.0)
-    speechiness_score = ADVANCED_WEIGHTS["speechiness"] * speechiness_similarity
+    speechiness_score = weights["speechiness"] * speechiness_similarity
     reasons.append(
         _feature_reason(
-            "speechiness", speechiness_score, ADVANCED_WEIGHTS["speechiness"], f"similarity {speechiness_similarity:.2f}"
+            "speechiness", speechiness_score, weights["speechiness"], f"similarity {speechiness_similarity:.2f}"
         )
     )
 
@@ -418,7 +477,7 @@ def score_song(
         + liveness_score
         + speechiness_score
     )
-    available_weight = TOTAL_WEIGHT if include_energy else TOTAL_WEIGHT - CORE_WEIGHTS["energy"]
+    available_weight = ranking_strategy.total_weight if include_energy else ranking_strategy.total_weight - weights["energy"]
     return round(100.0 * earned / available_weight, 2), reasons
 
 
@@ -429,13 +488,12 @@ def recommend_songs(
     mode: str = "balanced",
 ) -> list[tuple[SongRecord, float, str]]:
     """Score every song and return a deterministic, descending top-k list."""
-    if mode != "balanced":
-        raise ValueError("only the balanced ranking mode is available until the strategy extension")
+    strategy = get_strategy(mode)
     if not 1 <= k <= len(songs):
         raise ValueError(f"k must be between 1 and {len(songs)}")
     scored = []
     for song in songs:
         record = song.to_record() if isinstance(song, Song) else validate_song_record(song)
-        score, reasons = score_song(user_prefs, record)
+        score, reasons = score_song(user_prefs, record, strategy=strategy)
         scored.append((record, score, "; ".join(reasons)))
     return sorted(scored, key=lambda item: (-item[1], item[0]["title"].casefold()))[:k]

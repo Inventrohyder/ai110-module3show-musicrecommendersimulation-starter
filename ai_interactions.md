@@ -29,4 +29,22 @@ I asked Codex desktop (GPT-5) to implement the approved VibeFinder delivery plan
 
 ## Design Pattern (SF10)
 
-This section is completed in the later ranking-strategy layer, where two real ranking strategies are introduced and tested.
+### Prompt used
+
+- “`energy-first` is a real Strategy implementation, not a conditional scattered across the code.”
+
+### Which design pattern did I use?
+
+I used the **Strategy pattern**. `BalancedStrategy` and `EnergyFirstStrategy` each own one complete feature-weight map; `get_strategy` resolves the selected mode, and the shared scorer reads the strategy's weights.
+
+### How did AI help me brainstorm or implement it?
+
+The approved user plan required “a real Strategy implementation, not a conditional scattered across the code.” Codex desktop suggested a small shared `RankingStrategy` base with two concrete weight-owning strategies instead of factories or per-feature mode checks. The user-approved plan selected the balanced and energy-first modes; the agent implemented the focused pattern.
+
+### How does the pattern appear in the final code?
+
+`src/recommender.py` defines `RankingStrategy`, `BalancedStrategy`, `EnergyFirstStrategy`, and `STRATEGIES`. `recommend_songs(..., mode=...)` resolves the strategy once and passes it to `score_song`; `src/main.py` exposes `--mode balanced|energy-first`. Checked-in-catalog tests verify that energy-first changes the ordering and that the CLI accepts the mode.
+
+### What did I verify manually?
+
+I ran `uv run python -m src.main --profile high-energy-pop --mode energy-first --top-k 10` and compared it with the balanced result. The energy-first ranking moves _Enter Sandman_ above _Storm Runner_, so the selectable strategy has observable behavior rather than a cosmetic CLI option.

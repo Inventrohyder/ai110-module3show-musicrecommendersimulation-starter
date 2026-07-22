@@ -64,6 +64,17 @@ The extended profile and catalog add release decade, mood tags, instrumentalness
 | Speechiness closeness        |      4 |
 | **Advanced-attribute total** | **22** |
 
+### Ranking modes
+
+`balanced` is the default. `energy-first` is a Strategy implementation that uses the same scoring engine but shifts weight from genre and mood toward energy and tempo.
+
+| Feature              | Balanced | Energy-first |
+| -------------------- | -------: | -----------: |
+| Genre / mood         |  18 / 12 |       12 / 8 |
+| Energy / tempo       |   12 / 8 |      25 / 15 |
+| Remaining attributes |       44 |           37 |
+| **Total**            |   **94** |       **97** |
+
 The scorer returns both the numeric result and each feature contribution, so a reason like `energy similarity 0.97: +11.6/12` can be checked directly against the algorithm.
 
 ---
@@ -84,6 +95,8 @@ The scorer returns both the numeric result and each feature contribution, so a r
    uv run python -m src.main
    ```
 
+Use `--mode balanced|energy-first` to select a ranking strategy. The CLI also accepts `--profile high-energy-pop|chill-lofi|deep-intense-rock`, `--top-k 1..20`, and `--all-profiles`.
+
 For a pip-only course environment, install the generated fallback export with `pip install -r requirements-dev.txt`.
 
 ### Running Tests
@@ -98,7 +111,7 @@ uv run pytest
 
 ## Sample Recommendation Output
 
-This is the actual output of `uv run python -m src.main --top-k 3` from the advanced-attribute catalog.
+`uv run python -m src.main --top-k 3` produced:
 
 ```text
 VibeFinder | profile: high-energy-pop | mode: balanced
@@ -117,7 +130,7 @@ VibeFinder | profile: high-energy-pop | mode: balanced
 
 ## Experiments You Tried
 
-This is the actual output of `uv run python -m src.main --all-profiles --top-k 1`.
+### Multiple-profile evaluation
 
 ```text
 VibeFinder | profile: high-energy-pop | mode: balanced
@@ -141,6 +154,10 @@ The profiles visibly move the ranking toward upbeat pop, low-energy acoustic lof
 ### Controlled energy experiment
 
 For the verified recording **Happy** under the high-energy-pop profile, the normal score was **93.66/100**. Removing the energy contribution produced **93.17/100**. The change confirms that energy is scored, while the remaining contributions show why it is not the only factor.
+
+### Ranking-mode experiment
+
+For `high-energy-pop`, both modes agree on the first five rows, but a ten-result run changes the ordering: balanced ranks **Storm Runner** ahead of **Enter Sandman**, while energy-first reverses them because energy and tempo receive more weight.
 
 The [required-rubric audit](docs/core-rubric-audit.md) maps each required point to its code, tests, and reader-facing evidence.
 
