@@ -1,0 +1,19 @@
+[project]
+name = "vibefinder"
+version = "0.1.0"
+description = "An explainable, classroom music recommender simulation."
+readme = "README.md"
+requires-python = ">=3.14,<3.15"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3,<9",
+    "pytest-bdd>=8.1.0",
+    "pytest-cov>=7.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+pythonpath = ["."]
