@@ -19,3 +19,4 @@ All notable changes to VibeFinder are documented here. This project follows a sm
 - Added selectable balanced and energy-first ranking strategies.
 - Added a transparent greedy artist-exposure penalty to reduce repeated artists in top-k results.
 - Added a `tabulate` results table that exposes rank, scores, modes, and wrapped explanations.
+- Audited all required and stretch rubric evidence before submission.

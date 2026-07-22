@@ -215,6 +215,8 @@ For `high-energy-pop`, both modes agree on the first five rows, but a ten-result
 
 The [required-rubric audit](docs/core-rubric-audit.md) maps each required point to its code, tests, and reader-facing evidence.
 
+The [final rubric audit](docs/final-rubric-audit.md) maps required and stretch points to the final release gates.
+
 ---
 
 ## Limitations and Risks
