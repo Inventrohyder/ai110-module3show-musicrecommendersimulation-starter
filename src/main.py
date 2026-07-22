@@ -4,9 +4,18 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+from textwrap import fill
 from typing import Sequence
 
-from src.recommender import STRATEGIES, load_songs, recommend_songs
+from tabulate import tabulate
+
+from src.recommender import (
+    STRATEGIES,
+    get_strategy,
+    load_songs,
+    recommend_songs,
+    score_song,
+)
 
 DEFAULT_PROFILE_NAME = "high-energy-pop"
 DEFAULT_PROFILE = {
@@ -85,6 +94,35 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def render_recommendations(
+    profile: dict[str, object], recommendations: list[tuple[dict[str, object], float, str]], mode: str
+) -> str:
+    """Render scores and their exact reasons in a readable terminal table."""
+    strategy = get_strategy(mode)
+    rows = []
+    for rank, (song, final_score, explanation) in enumerate(recommendations, start=1):
+        base_score, _ = score_song(profile, song, strategy=strategy)
+        rows.append(
+            [
+                rank,
+                song["title"],
+                song["artist"],
+                mode,
+                f"{base_score:.2f}",
+                f"{final_score:.2f}",
+                fill(explanation, width=72),
+            ]
+        )
+    return tabulate(
+        rows,
+        headers=["Rank", "Song", "Artist", "Mode", "Base score", "Final score", "Reasons"],
+        tablefmt="rounded_outline",
+        maxcolwidths=[None, 22, 22, 14, None, None, 72],
+        stralign="left",
+        numalign="right",
+    )
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     """Load the real catalog, rank it, and print score-derived explanations."""
     args = build_parser().parse_args(argv)
@@ -96,9 +134,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         recommendations = recommend_songs(profile, songs, args.top_k, args.mode)
         print(f"VibeFinder | profile: {profile_name} | mode: {args.mode}")
         print()
-        for rank, (song, score, explanation) in enumerate(recommendations, start=1):
-            print(f"{rank}. {song['title']} — {song['artist']} | {score:.2f}/100")
-            print(f"   Why: {explanation}")
+        print(render_recommendations(profile, recommendations, args.mode))
 
 
 if __name__ == "__main__":

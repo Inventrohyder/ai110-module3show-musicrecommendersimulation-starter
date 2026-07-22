@@ -115,17 +115,36 @@ uv run pytest
 
 ## Sample Recommendation Output
 
-`uv run python -m src.main --top-k 3` produced:
+The following is captured from `uv run python -m src.main --top-k 3`. The `tabulate` table includes rank, song, artist, mode, base score, final score, and score-derived reasons:
 
 ```text
 VibeFinder | profile: high-energy-pop | mode: balanced
 
-1. Sunrise City — Neon Echo | 94.76/100
-   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97: +11.6/12; tempo similarity 0.85: +6.8/8; valence similarity 0.96: +7.7/8; danceability similarity 0.94: +7.5/8; acoustic preference similarity 0.82: +4.9/6; release decade similarity 0.75: +3.8/5; mood-tag overlap similarity 1.00: +5.0/5; instrumental preference similarity 1.00: +4.0/4; liveness similarity 0.97: +3.9/4; speechiness similarity 0.97: +3.9/4
-2. Happy — Pharrell Williams | 93.66/100
-   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97: +11.6/12; tempo similarity 0.62: +5.0/8; valence similarity 0.88: +7.0/8; danceability similarity 0.90: +7.2/8; acoustic preference similarity 0.90: +5.4/6; release decade similarity 1.00: +5.0/5; mood-tag overlap similarity 1.00: +5.0/5; instrumental preference similarity 1.00: +4.0/4; liveness similarity 0.97: +3.9/4; speechiness similarity 0.97: +3.9/4
-3. Gym Hero — Max Pulse | 80.93/100
-   Why: genre match: +18.0/18; mood mismatch: +0.0/12; energy similarity 0.92: +11.0/12; tempo similarity 0.97: +7.8/8; valence similarity 0.97: +7.8/8; danceability similarity 0.97: +7.8/8; acoustic preference similarity 0.95: +5.7/6; release decade similarity 0.75: +3.8/5; mood-tag overlap similarity 0.50: +2.5/5; instrumental preference similarity 1.00: +4.0/4; liveness similarity 0.94: +3.8/4; speechiness similarity 1.00: +4.0/4
+╭────────┬──────────────┬───────────────────┬──────────┬──────────────┬───────────────┬─────────────────────────────────────────────────────────────────────────╮
+│   Rank │ Song         │ Artist            │ Mode     │   Base score │   Final score │ Reasons                                                                 │
+├────────┼──────────────┼───────────────────┼──────────┼──────────────┼───────────────┼─────────────────────────────────────────────────────────────────────────┤
+│      1 │ Sunrise City │ Neon Echo         │ balanced │        94.76 │         94.76 │ genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97:    │
+│        │              │                   │          │              │               │ +11.6/12; tempo similarity 0.85: +6.8/8; valence similarity 0.96:       │
+│        │              │                   │          │              │               │ +7.7/8; danceability similarity 0.94: +7.5/8; acoustic preference       │
+│        │              │                   │          │              │               │ similarity 0.82: +4.9/6; release decade similarity 0.75: +3.8/5; mood-  │
+│        │              │                   │          │              │               │ tag overlap similarity 1.00: +5.0/5; instrumental preference similarity │
+│        │              │                   │          │              │               │ 1.00: +4.0/4; liveness similarity 0.97: +3.9/4; speechiness similarity  │
+│        │              │                   │          │              │               │ 0.97: +3.9/4                                                            │
+│      2 │ Happy        │ Pharrell Williams │ balanced │        93.66 │         93.66 │ genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97:    │
+│        │              │                   │          │              │               │ +11.6/12; tempo similarity 0.62: +5.0/8; valence similarity 0.88:       │
+│        │              │                   │          │              │               │ +7.0/8; danceability similarity 0.90: +7.2/8; acoustic preference       │
+│        │              │                   │          │              │               │ similarity 0.90: +5.4/6; release decade similarity 1.00: +5.0/5; mood-  │
+│        │              │                   │          │              │               │ tag overlap similarity 1.00: +5.0/5; instrumental preference similarity │
+│        │              │                   │          │              │               │ 1.00: +4.0/4; liveness similarity 0.97: +3.9/4; speechiness similarity  │
+│        │              │                   │          │              │               │ 0.97: +3.9/4                                                            │
+│      3 │ Gym Hero     │ Max Pulse         │ balanced │        80.93 │         80.93 │ genre match: +18.0/18; mood mismatch: +0.0/12; energy similarity 0.92:  │
+│        │              │                   │          │              │               │ +11.0/12; tempo similarity 0.97: +7.8/8; valence similarity 0.97:       │
+│        │              │                   │          │              │               │ +7.8/8; danceability similarity 0.97: +7.8/8; acoustic preference       │
+│        │              │                   │          │              │               │ similarity 0.95: +5.7/6; release decade similarity 0.75: +3.8/5; mood-  │
+│        │              │                   │          │              │               │ tag overlap similarity 0.50: +2.5/5; instrumental preference similarity │
+│        │              │                   │          │              │               │ 1.00: +4.0/4; liveness similarity 0.94: +3.8/4; speechiness similarity  │
+│        │              │                   │          │              │               │ 1.00: +4.0/4                                                            │
+╰────────┴──────────────┴───────────────────┴──────────┴──────────────┴───────────────┴─────────────────────────────────────────────────────────────────────────╯
 ```
 
 **Screenshot or video** _(optional)_: <!-- Insert a screenshot or demo video link here -->
@@ -136,24 +155,55 @@ VibeFinder | profile: high-energy-pop | mode: balanced
 
 ### Multiple-profile evaluation
 
+The following is captured from `uv run python -m src.main --all-profiles --top-k 1`:
+
 ```text
 VibeFinder | profile: high-energy-pop | mode: balanced
 
-1. Sunrise City — Neon Echo | 94.76/100
-   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97: +11.6/12; tempo similarity 0.85: +6.8/8; valence similarity 0.96: +7.7/8; danceability similarity 0.94: +7.5/8; acoustic preference similarity 0.82: +4.9/6; release decade similarity 0.75: +3.8/5; mood-tag overlap similarity 1.00: +5.0/5; instrumental preference similarity 1.00: +4.0/4; liveness similarity 0.97: +3.9/4; speechiness similarity 0.97: +3.9/4
+╭────────┬──────────────┬───────────┬──────────┬──────────────┬───────────────┬─────────────────────────────────────────────────────────────────────────╮
+│   Rank │ Song         │ Artist    │ Mode     │   Base score │   Final score │ Reasons                                                                 │
+├────────┼──────────────┼───────────┼──────────┼──────────────┼───────────────┼─────────────────────────────────────────────────────────────────────────┤
+│      1 │ Sunrise City │ Neon Echo │ balanced │        94.76 │         94.76 │ genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97:    │
+│        │              │           │          │              │               │ +11.6/12; tempo similarity 0.85: +6.8/8; valence similarity 0.96:       │
+│        │              │           │          │              │               │ +7.7/8; danceability similarity 0.94: +7.5/8; acoustic preference       │
+│        │              │           │          │              │               │ similarity 0.82: +4.9/6; release decade similarity 0.75: +3.8/5; mood-  │
+│        │              │           │          │              │               │ tag overlap similarity 1.00: +5.0/5; instrumental preference similarity │
+│        │              │           │          │              │               │ 1.00: +4.0/4; liveness similarity 0.97: +3.9/4; speechiness similarity  │
+│        │              │           │          │              │               │ 0.97: +3.9/4                                                            │
+╰────────┴──────────────┴───────────┴──────────┴──────────────┴───────────────┴─────────────────────────────────────────────────────────────────────────╯
 
 VibeFinder | profile: chill-lofi | mode: balanced
 
-1. Library Rain — Paper Lanterns | 89.57/100
-   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.95: +11.4/12; tempo similarity 0.90: +7.2/8; valence similarity 0.95: +7.6/8; danceability similarity 0.87: +7.0/8; acoustic preference similarity 0.86: +5.2/6; release decade similarity 0.50: +2.5/5; mood-tag overlap similarity 0.50: +2.5/5; instrumental preference similarity 0.80: +3.2/4; liveness similarity 0.96: +3.8/4; speechiness similarity 0.96: +3.8/4
+╭────────┬──────────────┬────────────────┬──────────┬──────────────┬───────────────┬─────────────────────────────────────────────────────────────────────────╮
+│   Rank │ Song         │ Artist         │ Mode     │   Base score │   Final score │ Reasons                                                                 │
+├────────┼──────────────┼────────────────┼──────────┼──────────────┼───────────────┼─────────────────────────────────────────────────────────────────────────┤
+│      1 │ Library Rain │ Paper Lanterns │ balanced │        89.57 │         89.57 │ genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.95:    │
+│        │              │                │          │              │               │ +11.4/12; tempo similarity 0.90: +7.2/8; valence similarity 0.95:       │
+│        │              │                │          │              │               │ +7.6/8; danceability similarity 0.87: +7.0/8; acoustic preference       │
+│        │              │                │          │              │               │ similarity 0.86: +5.2/6; release decade similarity 0.50: +2.5/5; mood-  │
+│        │              │                │          │              │               │ tag overlap similarity 0.50: +2.5/5; instrumental preference similarity │
+│        │              │                │          │              │               │ 0.80: +3.2/4; liveness similarity 0.96: +3.8/4; speechiness similarity  │
+│        │              │                │          │              │               │ 0.96: +3.8/4                                                            │
+╰────────┴──────────────┴────────────────┴──────────┴──────────────┴───────────────┴─────────────────────────────────────────────────────────────────────────╯
 
 VibeFinder | profile: deep-intense-rock | mode: balanced
 
-1. Everlong — Foo Fighters | 97.26/100
-   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97: +11.6/12; tempo similarity 0.84: +6.7/8; valence similarity 0.98: +7.8/8; danceability similarity 0.94: +7.5/8; acoustic preference similarity 0.98: +5.9/6; release decade similarity 1.00: +5.0/5; mood-tag overlap similarity 1.00: +5.0/5; instrumental preference similarity 1.00: +4.0/4; liveness similarity 0.97: +3.9/4; speechiness similarity 0.99: +4.0/4
+╭────────┬──────────┬──────────────┬──────────┬──────────────┬───────────────┬─────────────────────────────────────────────────────────────────────────╮
+│   Rank │ Song     │ Artist       │ Mode     │   Base score │   Final score │ Reasons                                                                 │
+├────────┼──────────┼──────────────┼──────────┼──────────────┼───────────────┼─────────────────────────────────────────────────────────────────────────┤
+│      1 │ Everlong │ Foo Fighters │ balanced │        97.26 │         97.26 │ genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97:    │
+│        │          │              │          │              │               │ +11.6/12; tempo similarity 0.84: +6.7/8; valence similarity 0.98:       │
+│        │          │              │          │              │               │ +7.8/8; danceability similarity 0.94: +7.5/8; acoustic preference       │
+│        │          │              │          │              │               │ similarity 0.98: +5.9/6; release decade similarity 1.00: +5.0/5; mood-  │
+│        │          │              │          │              │               │ tag overlap similarity 1.00: +5.0/5; instrumental preference similarity │
+│        │          │              │          │              │               │ 1.00: +4.0/4; liveness similarity 0.97: +3.9/4; speechiness similarity  │
+│        │          │              │          │              │               │ 0.99: +4.0/4                                                            │
+╰────────┴──────────┴──────────────┴──────────┴──────────────┴───────────────┴─────────────────────────────────────────────────────────────────────────╯
 ```
 
-The profiles visibly move the ranking toward upbeat pop, low-energy acoustic lofi, and intense guitar rock. The lofi profile also shows a limitation: a manually assigned mood tag or genre can still outweigh a listener's nuanced personal reaction.
+The profiles visibly shift the result toward upbeat pop, low-energy lofi, and intense rock. For the verified recording **Happy**, removing energy changes the score from **93.66** to **93.17**, confirming that energy affects a result without being its only cause.
+
+---
 
 ### Controlled energy experiment
 
