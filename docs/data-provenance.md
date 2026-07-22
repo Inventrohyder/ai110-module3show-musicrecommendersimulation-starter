@@ -2,7 +2,7 @@
 
 VibeFinder preserves the ten course-provided starter songs and extends that catalog with ten real recordings. The starter entries are fictional classroom simulation data, so they have no release-year or MusicBrainz claim. MusicBrainz recording pages were used to verify the added recordings' artist/title identity and original release year. The catalog does not copy audio, lyrics, cover art, popularity metrics, or proprietary streaming analysis.
 
-`energy`, `mood`, `tempo_bpm`, `valence`, `danceability`, and `acousticness` are student-reviewed **simulation annotations** for every row. They are normalized estimates for explaining this small content-based exercise, not claims about Spotify, YouTube, or MusicBrainz metadata.
+`energy`, `mood`, `tempo_bpm`, `valence`, `danceability`, `acousticness`, `release_decade`, `mood_tags`, `instrumentalness`, `liveness`, and `speechiness` are student-reviewed **simulation annotations** for every row. They are normalized estimates for explaining this small content-based exercise, not claims about Spotify, YouTube, or MusicBrainz metadata.
 
 | #   | Recording           | Artist            | Catalog source     | Release year | MusicBrainz verification                                                            | Verified   |
 | --- | ------------------- | ----------------- | ------------------ | -----------: | ----------------------------------------------------------------------------------- | ---------- |
@@ -32,4 +32,7 @@ VibeFinder preserves the ten course-provided starter songs and extends that cata
 - **Genre and mood:** broad classroom labels used for direct preference matching.
 - **Energy, valence, danceability, acousticness:** a 0–1 relative estimate, assigned consistently across this small catalog.
 - **Tempo:** approximate beats per minute, used only as a closeness value rather than a claim of beat-tracking precision.
+- **Release decade:** a coarse student-assigned decade label; it is derived from a verified release year only for the added recordings.
+- **Mood tags:** pipe-delimited, broad descriptors. The scorer rewards the fraction of requested tags present in a song's tags.
+- **Instrumentalness, liveness, and speechiness:** 0–1 classroom estimates, not provider measurements.
 - **Review:** `load_songs` checks every value for range and type validity. The catalog deliberately spans high/low energy, acoustic/electronic texture, and eight genres.

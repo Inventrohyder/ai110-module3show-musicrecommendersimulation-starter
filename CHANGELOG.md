@@ -15,3 +15,4 @@ All notable changes to VibeFinder are documented here. This project follows a sm
 - Added a portable, explainable command-line recommendation flow.
 - Added three profile evaluations, BDD scenarios, and a controlled energy-feature experiment.
 - Audited all required-rubric evidence before starting stretch work.
+- Added five validated advanced song attributes and their transparent score contributions.

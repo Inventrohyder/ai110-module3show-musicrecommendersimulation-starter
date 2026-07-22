@@ -49,7 +49,20 @@ The balanced score normalizes its earned points to 0–100. Categorical features
 | Valence closeness      |      8 |
 | Danceability closeness |      8 |
 | Acoustic preference    |      6 |
-| **Total**              | **72** |
+| **Core total**         | **72** |
+
+### Advanced descriptors
+
+The extended profile and catalog add release decade, mood tags, instrumentalness, liveness, and speechiness. These are student-reviewed simulation annotations, not claims about proprietary streaming analysis. The additional contributions are included in each score explanation and the combined score is normalized to 0–100.
+
+| Additional feature           | Weight |
+| ---------------------------- | -----: |
+| Release-decade closeness     |      5 |
+| Mood-tag overlap             |      5 |
+| Instrumentalness preference  |      4 |
+| Liveness closeness           |      4 |
+| Speechiness closeness        |      4 |
+| **Advanced-attribute total** | **22** |
 
 The scorer returns both the numeric result and each feature contribution, so a reason like `energy similarity 0.97: +11.6/12` can be checked directly against the algorithm.
 
@@ -85,17 +98,17 @@ uv run pytest
 
 ## Sample Recommendation Output
 
-This is the actual output of `uv run python -m src.main --top-k 3` from the checked-in catalog.
+This is the actual output of `uv run python -m src.main --top-k 3` from the advanced-attribute catalog.
 
 ```text
 VibeFinder | profile: high-energy-pop | mode: balanced
 
-1. Sunrise City — Neon Echo | 95.22/100
-   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97: +11.6/12; tempo similarity 0.85: +6.8/8; valence similarity 0.96: +7.7/8; danceability similarity 0.94: +7.5/8; acoustic preference similarity 0.82: +4.9/6
-2. Happy — Pharrell Williams | 92.06/100
-   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97: +11.6/12; tempo similarity 0.62: +5.0/8; valence similarity 0.88: +7.0/8; danceability similarity 0.90: +7.2/8; acoustic preference similarity 0.90: +5.4/6
-3. Gym Hero — Max Pulse | 80.64/100
-   Why: genre match: +18.0/18; mood mismatch: +0.0/12; energy similarity 0.92: +11.0/12; tempo similarity 0.97: +7.8/8; valence similarity 0.97: +7.8/8; danceability similarity 0.97: +7.8/8; acoustic preference similarity 0.95: +5.7/6
+1. Sunrise City — Neon Echo | 94.76/100
+   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97: +11.6/12; tempo similarity 0.85: +6.8/8; valence similarity 0.96: +7.7/8; danceability similarity 0.94: +7.5/8; acoustic preference similarity 0.82: +4.9/6; release decade similarity 0.75: +3.8/5; mood-tag overlap similarity 1.00: +5.0/5; instrumental preference similarity 1.00: +4.0/4; liveness similarity 0.97: +3.9/4; speechiness similarity 0.97: +3.9/4
+2. Happy — Pharrell Williams | 93.66/100
+   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97: +11.6/12; tempo similarity 0.62: +5.0/8; valence similarity 0.88: +7.0/8; danceability similarity 0.90: +7.2/8; acoustic preference similarity 0.90: +5.4/6; release decade similarity 1.00: +5.0/5; mood-tag overlap similarity 1.00: +5.0/5; instrumental preference similarity 1.00: +4.0/4; liveness similarity 0.97: +3.9/4; speechiness similarity 0.97: +3.9/4
+3. Gym Hero — Max Pulse | 80.93/100
+   Why: genre match: +18.0/18; mood mismatch: +0.0/12; energy similarity 0.92: +11.0/12; tempo similarity 0.97: +7.8/8; valence similarity 0.97: +7.8/8; danceability similarity 0.97: +7.8/8; acoustic preference similarity 0.95: +5.7/6; release decade similarity 0.75: +3.8/5; mood-tag overlap similarity 0.50: +2.5/5; instrumental preference similarity 1.00: +4.0/4; liveness similarity 0.94: +3.8/4; speechiness similarity 1.00: +4.0/4
 ```
 
 **Screenshot or video** _(optional)_: <!-- Insert a screenshot or demo video link here -->
@@ -104,54 +117,38 @@ VibeFinder | profile: high-energy-pop | mode: balanced
 
 ## Experiments You Tried
 
-The profile and scoring experiments are documented with their actual output in the corresponding implementation layers.
+This is the actual output of `uv run python -m src.main --all-profiles --top-k 1`.
+
+```text
+VibeFinder | profile: high-energy-pop | mode: balanced
+
+1. Sunrise City — Neon Echo | 94.76/100
+   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97: +11.6/12; tempo similarity 0.85: +6.8/8; valence similarity 0.96: +7.7/8; danceability similarity 0.94: +7.5/8; acoustic preference similarity 0.82: +4.9/6; release decade similarity 0.75: +3.8/5; mood-tag overlap similarity 1.00: +5.0/5; instrumental preference similarity 1.00: +4.0/4; liveness similarity 0.97: +3.9/4; speechiness similarity 0.97: +3.9/4
+
+VibeFinder | profile: chill-lofi | mode: balanced
+
+1. Library Rain — Paper Lanterns | 89.57/100
+   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.95: +11.4/12; tempo similarity 0.90: +7.2/8; valence similarity 0.95: +7.6/8; danceability similarity 0.87: +7.0/8; acoustic preference similarity 0.86: +5.2/6; release decade similarity 0.50: +2.5/5; mood-tag overlap similarity 0.50: +2.5/5; instrumental preference similarity 0.80: +3.2/4; liveness similarity 0.96: +3.8/4; speechiness similarity 0.96: +3.8/4
+
+VibeFinder | profile: deep-intense-rock | mode: balanced
+
+1. Everlong — Foo Fighters | 97.26/100
+   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97: +11.6/12; tempo similarity 0.84: +6.7/8; valence similarity 0.98: +7.8/8; danceability similarity 0.94: +7.5/8; acoustic preference similarity 0.98: +5.9/6; release decade similarity 1.00: +5.0/5; mood-tag overlap similarity 1.00: +5.0/5; instrumental preference similarity 1.00: +4.0/4; liveness similarity 0.97: +3.9/4; speechiness similarity 0.99: +4.0/4
+```
+
+The profiles visibly move the ranking toward upbeat pop, low-energy acoustic lofi, and intense guitar rock. The lofi profile also shows a limitation: a manually assigned mood tag or genre can still outweigh a listener's nuanced personal reaction.
+
+### Controlled energy experiment
+
+For the verified recording **Happy** under the high-energy-pop profile, the normal score was **93.66/100**. Removing the energy contribution produced **93.17/100**. The change confirms that energy is scored, while the remaining contributions show why it is not the only factor.
+
+The [required-rubric audit](docs/core-rubric-audit.md) maps each required point to its code, tests, and reader-facing evidence.
 
 ---
 
 ## Limitations and Risks
 
 This is a small, manually annotated catalog. It does not understand lyrics, cultural context, production quality, accessibility needs, or changing taste. It can over-reward a profile's explicitly stated features and cannot make a collaborative-filtering claim without real interaction data. The completed [Model Card](model_card.md) expands on these limitations and planned mitigations.
-
-## Multiple-profile evaluation
-
-This is the actual output of `uv run python -m src.main --all-profiles --top-k 3` before the later formatted-table extension.
-
-```text
-VibeFinder | profile: high-energy-pop | mode: balanced
-
-1. Sunrise City — Neon Echo | 95.22/100
-   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97: +11.6/12; tempo similarity 0.85: +6.8/8; valence similarity 0.96: +7.7/8; danceability similarity 0.94: +7.5/8; acoustic preference similarity 0.82: +4.9/6
-2. Happy — Pharrell Williams | 92.06/100
-   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97: +11.6/12; tempo similarity 0.62: +5.0/8; valence similarity 0.88: +7.0/8; danceability similarity 0.90: +7.2/8; acoustic preference similarity 0.90: +5.4/6
-3. Gym Hero — Max Pulse | 80.64/100
-   Why: genre match: +18.0/18; mood mismatch: +0.0/12; energy similarity 0.92: +11.0/12; tempo similarity 0.97: +7.8/8; valence similarity 0.97: +7.8/8; danceability similarity 0.97: +7.8/8; acoustic preference similarity 0.95: +5.7/6
-
-VibeFinder | profile: chill-lofi | mode: balanced
-
-1. Library Rain — Paper Lanterns | 94.89/100
-   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.95: +11.4/12; tempo similarity 0.90: +7.2/8; valence similarity 0.95: +7.6/8; danceability similarity 0.87: +7.0/8; acoustic preference similarity 0.86: +5.2/6
-2. Midnight Coding — LoRoom | 93.31/100
-   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.88: +10.6/12; tempo similarity 0.97: +7.8/8; valence similarity 0.99: +7.9/8; danceability similarity 0.83: +6.6/8; acoustic preference similarity 0.71: +4.3/6
-3. Focus Flow — LoRoom | 77.72/100
-   Why: genre match: +18.0/18; mood mismatch: +0.0/12; energy similarity 0.90: +10.8/12; tempo similarity 1.00: +8.0/8; valence similarity 0.96: +7.7/8; danceability similarity 0.85: +6.8/8; acoustic preference similarity 0.78: +4.7/6
-
-VibeFinder | profile: deep-intense-rock | mode: balanced
-
-1. Everlong — Foo Fighters | 96.64/100
-   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.97: +11.6/12; tempo similarity 0.84: +6.7/8; valence similarity 0.98: +7.8/8; danceability similarity 0.94: +7.5/8; acoustic preference similarity 0.98: +5.9/6
-2. Enter Sandman — Metallica | 95.56/100
-   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.99: +11.9/12; tempo similarity 0.72: +5.8/8; valence similarity 0.93: +7.4/8; danceability similarity 0.96: +7.7/8; acoustic preference similarity 1.00: +6.0/6
-3. Storm Runner — Voltline | 95.08/100
-   Why: genre match: +18.0/18; mood match: +12.0/12; energy similarity 0.94: +11.3/12; tempo similarity 0.91: +7.3/8; valence similarity 0.92: +7.4/8; danceability similarity 0.89: +7.1/8; acoustic preference similarity 0.90: +5.4/6
-```
-
-The profile changes visibly change the results: high-energy pop rewards upbeat, danceable pop; chill lofi shifts to low-energy, acoustic tracks; deep-intense rock shifts to high-energy rock. The lofi output also reveals a limitation: Focus Flow remains high despite its mood mismatch because the other numerical and genre terms compensate for the missing 12 mood points.
-
-### Controlled energy experiment
-
-For the real song **Happy** under the high-energy-pop profile, the normal score was **92.06/100**. Calling the scorer with its energy contribution removed produced **91.07/100**. That small, measurable drop makes the energy feature's effect explicit; it also shows that the result is not driven by energy alone.
-
-The [required-rubric audit](docs/core-rubric-audit.md) maps each required point to its code, tests, and reader-facing evidence.
 
 ---
 
